@@ -43,7 +43,7 @@ class $modify(NongSongWidget, CustomSongWidget) {
 		m_fields->nongdSong = songInfo->m_songID;
 
 		auto nongsRes = NongManager::get()->getNongs(songInfo->m_songID);
-		if (nongsRes.has_error()) {
+		if (nongsRes.has_error() && songInfo->m_songURL != gd::string("")) {
 			auto strPath = std::string(MusicDownloadManager::sharedState()->pathForSong(songInfo->m_songID));
 
 			SongInfo defaultSong = {
@@ -72,7 +72,11 @@ class $modify(NongSongWidget, CustomSongWidget) {
 			});
 		}
 
-		m_fields->nongData = NongManager::get()->getNongs(m_songInfo->m_songID).unwrap();
+		auto nongsRes2 = NongManager::get()->getNongs(m_songInfo->m_songID);
+		if (nongsRes2.has_error()) {
+			return true;
+		}
+		m_fields->nongData = nongsRes2.unwrap();
 		SongInfo nong;
 		for (auto song : m_fields->nongData.songs) {
 			if (song.path == m_fields->nongData.active) {
@@ -80,9 +84,12 @@ class $modify(NongSongWidget, CustomSongWidget) {
 			}
 		}
 
-		m_songInfo->m_artistName = nong.authorName;
-		m_songInfo->m_songName = nong.songName;
-		this->updateSongObject(m_songInfo);
+		if (m_songInfo->m_artistName != gd::string(nong.authorName) || m_songInfo->m_songName != gd::string(nong.songName)) {
+			m_songInfo->m_artistName = nong.authorName;
+			m_songInfo->m_songName = nong.songName;
+			this->updateSongObject(m_songInfo);
+		}
+
 		if (auto found = this->getChildByID("song-name-menu")) {
 			this->updateSongNameLabel(m_songInfo->m_songName, m_songInfo->m_songID);
 		} else {
@@ -191,7 +198,7 @@ class $modify(NongSongWidget, CustomSongWidget) {
 
 		m_fields->nongdSong = song->m_songID;
 		auto nongsRes = NongManager::get()->getNongs(song->m_songID);
-		if (nongsRes.has_error()) {
+		if (nongsRes.has_error() && song->m_songURL != gd::string("")) {
 			auto strPath = std::string(MusicDownloadManager::sharedState()->pathForSong(song->m_songID));
 
 			SongInfo defaultSong = {
@@ -203,8 +210,13 @@ class $modify(NongSongWidget, CustomSongWidget) {
 
 			NongManager::get()->createDefaultSongIfNull(defaultSong, song->m_songID);
 		}
+		auto nongsRes2 = NongManager::get()->getNongs(song->m_songID);
+		if (nongsRes2.has_error()) {
+			CustomSongWidget::updateSongObject(song);
+			return;
+		}
 		SongInfo active;
-		auto nongData = NongManager::get()->getNongs(song->m_songID).unwrap();
+		auto nongData = nongsRes2.unwrap();
 		for (auto nong : nongData.songs) {
 			if (nong.path == nongData.active) {
 				active = nong;
