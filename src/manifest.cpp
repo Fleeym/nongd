@@ -2,6 +2,6 @@
 
 namespace nongd {
     int get_manifest_version() {
-        return 1;
+        return 2;
     }
 }

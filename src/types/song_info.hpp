@@ -12,6 +12,7 @@ struct SongInfo {
     std::string songName;
     std::string authorName;
     std::string songUrl;
+    std::string levelName;
 };
 
 struct NongData {
@@ -35,7 +36,11 @@ struct json::Serialize<NongData> {
                 .songName = jsonSong["songName"].as_string(),
                 .authorName = jsonSong["authorName"].as_string(),
                 .songUrl = jsonSong["songUrl"].as_string(),
+                .levelName = ""
             };
+            if (jsonSong.contains("levelName")) {
+                song.levelName = jsonSong["levelName"].as_string();
+            }
             songs.push_back(song);
         }
 
@@ -67,6 +72,9 @@ struct json::Serialize<NongData> {
             obj["songName"] = song.songName;
             obj["authorName"] = song.authorName;
             obj["songUrl"] = song.songUrl;
+            if (song.levelName != "") {
+                obj["levelName"] = song.levelName;
+            }
 
             array.push_back(obj);
         }
