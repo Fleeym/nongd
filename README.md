@@ -1,31 +1,33 @@
-# NONGD
+# Jukebox
 
 <img src="./logo.png" alt="NONGD logo" />
 
-NONGD is a song manager for Geometry Dash. It swaps newgrounds songs with their NONG counterparts.
+The Jukebox Mod is a song manager for Geometry Dash. The primary goal is simplifying the process of swapping Newgrounds songs with any NONGs.
 
-## What is NONG?
+## What is a NONG, anyway?
 
 NONG stands for **Not On NewGrounds**. Basically, it means any song that is not on Newgrounds that was replaced manually through the game files. 
 
 NONGs have always been a hassle to manage, because some level creators use popular Newgrounds song IDs and replace them with a NONG. So you have to swap those song files around quite a bit if you play a level with the Newgrounds song and a level with a NONG song.
 
-## Enter NONGD
+## Start your jukebox!
 
-NONGD stands for **Not On NewGrounds, Duh**. It automates the process of swapping NONGs with their Newgrounds counterparts. It even allows for multiple NONGs on the same song ID.
+The Jukebox Mod makes the process of managing your songs a breeze. You have 2 choices for adding a song to the game.
 
-## How does it work?
+1. Fetch from Song File Hub
+2. Download MP3 manually and add it ingame
 
-You download your NONGs using your method of choice. After getting the mp3 file, you need to fill out the song name and author name. This is mostly for remembering which song is which.
+You can download your NONGs using your method of choice. A recommandation of mine is [yt-dlp](https://github.com/yt-dlp/yt-dlp), a CLI application. After getting your MP3 file, you can enter a song and author name, for easier management.
 
-Note that where you place your songs is up to you. If you happen to move the song after you added in in NONGD, it will be automatically removed from the list when you interact with that song ID, and you will have to add it again to the list.
+> Note that Jukebox copies imported MP3 files in the storage location designated by Geode. You can open this folder from ingame.
 
-Alternatively, you can download NONG data from Song File Hub, which is all tightly integrated inside the mod! It's still quite unoptimized, but i'm looking for a way to optimize it further.
+Alternatively, you can download song data from **Song File Hub**, which is all tightly integrated inside the mod! Huge thanks to their team for helping out with the integration.
 
-## Where can I find the NONGD menu?
+## So, how do I begin?
 
-The menu can be accessed by clicking on the song name label in either the level view screen or in the song select screen in the editor.
+You can open up the Jukebox menu form any Level page. Just click on the song name, and either a song list (if the level has multiple songs), or the song management screen (if the level only uses 1 song) will open. From here, you can add, remove, swap and fetch songs.
 
-## Details for mod makers
+## Credits
 
-NONGd makes some pretty heavy adjustments in CustomSongWidget. If you want to update labels in there, you will have to do an update for song-name-menu and nongd-id-and-size-label. song-name-menu is a CCMenuItemSpriteExtra which contains a label, and nongd-id-and-size-label is just a label. Their uses are pretty self explanatory I guess.
+- The Geode team, for creating such an amazing toolkit
+- Song File Hub, for creating the best song archive in the community (and also letting me interact with their API)
