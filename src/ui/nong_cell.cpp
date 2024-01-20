@@ -1,7 +1,7 @@
 // #include "nong_cell.hpp"
 
 // bool NongCell::init(SongInfo info, NongDropdownLayer* parentPopup, CCSize const& size, bool selected, bool isDefault) {
-//     if (!ListCell::init(parentPopup, size)) return false;
+//     if (!JBListCell::init(parentPopup, size)) return false;
 
 //     m_songInfo = info;
 //     m_parentPopup = parentPopup;

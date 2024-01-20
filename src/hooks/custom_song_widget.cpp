@@ -1,11 +1,37 @@
-// #include <Geode/binding/CustomSongWidget.hpp>
-// #include <Geode/modify/CustomSongWidget.hpp>
+#include <Geode/binding/CustomSongWidget.hpp>
+#include <Geode/modify/CustomSongWidget.hpp>
 
 // #include "../types/song_info.hpp"
 // #include "../managers/nong_manager.hpp"
 // #include "../ui/nong_dropdown_layer.hpp"
 
-// using namespace geode::prelude;
+using namespace geode::prelude;
+
+class $modify(JBSongWidget, CustomSongWidget) {
+    bool init(
+        SongInfoObject* songInfo,
+        CustomSongDelegate* songDelegate,
+        bool showSongSelect,
+        bool showPlayMusic,
+        bool showDownload,
+        bool isRobtopSong,
+        bool unk,
+        bool hasMultipleAssets
+    ) {
+        if (!CustomSongWidget::init(songInfo, songDelegate, showSongSelect, showPlayMusic, showDownload, isRobtopSong, unk, hasMultipleAssets)) {
+            return false;
+        }
+
+        if (isRobtopSong) {
+            return true;
+        }
+        
+
+        log::info("This works!");
+
+        return true;
+    }
+};
 
 // class $modify(NongSongWidget, CustomSongWidget) {
 // 	NongData nongData;

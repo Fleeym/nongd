@@ -53,12 +53,12 @@
 //     this->createList();
 // }
 
-// void NongDropdownLayer::exitLayer(CCObject* sender) {
+// void NongDropdownLayer::hideLayer(bool p1) {
 //     if (m_fetching) {
 //         return;
 //     }
 
-//     GJDropDownLayer::exitLayer(sender);
+//     GJDropDownLayer::hideLayer(p1);
 // }
 
 // void NongDropdownLayer::onSettings(CCObject* sender) {

@@ -9,15 +9,18 @@
 #include "../types/fetch_status.hpp"
 #include "../types/sfh_item.hpp"
 #include "../manifest.hpp"
+#include "../types/nong_db.hpp"
 
 using namespace geode::prelude;
 
 class NongManager : public CCObject {
 protected:
     inline static NongManager* m_instance = nullptr;
+    NongDB m_nongs; 
 
     void addNongsFromSFH(std::vector<SFHItem> const& songs, int songID);
 public:
+    bool loadSongs();
     /**
      * Adds a NONG to the JSON of a songID
      * 

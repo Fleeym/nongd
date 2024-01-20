@@ -10,7 +10,7 @@
 
 // class NongDropdownLayer;
 
-// class NongCell : public ListCell {
+// class NongCell : public JBListCell {
 // protected:
 //     SongInfo m_songInfo;
 //     CCLabelBMFont* m_songNameLabel;

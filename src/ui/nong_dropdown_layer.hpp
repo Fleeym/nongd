@@ -28,7 +28,8 @@
 //     void onSFHFetched(nongd::FetchStatus result);
 //     void onSettings(CCObject*);
 //     void openAddPopup(CCObject*);
-//     void exitLayer(CCObject* target) override;
+//     void hideLayer(bool p1);
+//     NongDropdownLayer() {};
 // public:
 //     int getSongID();
 //     void setActiveSong(SongInfo const& song);
