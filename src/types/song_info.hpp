@@ -22,8 +22,8 @@ struct NongData {
 };
 
 template<>
-struct json::Serialize<NongData> {
-    static NongData from_json(json::Value const& value) {
+struct matjson::Serialize<NongData> {
+    static NongData from_json(matjson::Value const& value) {
         std::vector<SongInfo> songs;
         auto jsonSongs = value["songs"].as_array();
 
@@ -55,14 +55,14 @@ struct json::Serialize<NongData> {
         };
     }
 
-    static json::Value to_json(NongData const& value) {
-        auto ret = json::Object();
-        auto array = json::Array();
+    static matjson::Value to_json(NongData const& value) {
+        auto ret = matjson::Object();
+        auto array = matjson::Array();
         ret["version"] = value.version;
         ret["active"] = value.active.string();
         ret["defaultPath"] = value.defaultPath.string();
         for (auto song : value.songs) {
-            auto obj = json::Object();
+            auto obj = matjson::Object();
             obj["path"] = song.path.string();
             obj["songName"] = song.songName;
             obj["authorName"] = song.authorName;

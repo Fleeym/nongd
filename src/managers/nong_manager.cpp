@@ -9,8 +9,8 @@ NongData NongManager::getNongs(int songID) {
     buffer << input.rdbuf();
     input.close();
 
-    auto json = json::parse(std::string_view(buffer.str()));
-    return json::Serialize<NongData>::from_json(json);
+    auto json = matjson::parse(std::string_view(buffer.str()));
+    return matjson::Serialize<NongData>::from_json(json);
 }
 
 SongInfo NongManager::getActiveNong(int songID) {
@@ -66,7 +66,7 @@ std::vector<SongInfo> NongManager::validateNongs(int songID) {
 
 void NongManager::saveNongs(NongData const& data, int songID) {
     auto path = this->getJsonPath(songID);
-    auto json = json::Serialize<NongData>::to_json(data);
+    auto json = matjson::Serialize<NongData>::to_json(data);
     std::ofstream output(path.string());
     output << json.dump();
     output.close();
@@ -190,8 +190,8 @@ void NongManager::fetchSFH(int songID, std::function<void(nongd::FetchStatus)> c
             copy.erase(std::remove_if(copy.begin(), copy.end(), [](char x) {
                 return static_cast<int>(x) < 0;
             }), copy.end());
-            json::Value data;
-            data = json::parse(copy);
+            matjson::Value data;
+            data = matjson::parse(copy);
             std::vector<SFHItem> ret;
             if (!data.is_array()) {
                 callback(nongd::FetchStatus::FAILED);
@@ -220,7 +220,7 @@ void NongManager::fetchSFH(int songID, std::function<void(nongd::FetchStatus)> c
             callback(nongd::FetchStatus::SUCCESS);
         })
         .expect([callback](std::string const& error) {
-            log::error(error);
+            log::error("{}", error);
             callback(nongd::FetchStatus::FAILED);
         })
         .cancelled([callback](auto r) {
