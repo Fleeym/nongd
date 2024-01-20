@@ -25,7 +25,6 @@ class $modify(JBSongWidget, CustomSongWidget) {
         if (isRobtopSong) {
             return true;
         }
-        
 
         log::info("This works!");
 

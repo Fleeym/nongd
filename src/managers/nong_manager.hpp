@@ -9,14 +9,14 @@
 #include "../types/fetch_status.hpp"
 #include "../types/sfh_item.hpp"
 #include "../manifest.hpp"
-#include "../types/nong_db.hpp"
+#include "../types/nong_state.hpp"
 
 using namespace geode::prelude;
 
 class NongManager : public CCObject {
 protected:
     inline static NongManager* m_instance = nullptr;
-    NongDB m_nongs; 
+    NongState m_nongs; 
 
     void addNongsFromSFH(std::vector<SFHItem> const& songs, int songID);
 public:

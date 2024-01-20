@@ -18,7 +18,6 @@ struct NongData {
     ghc::filesystem::path active;
     ghc::filesystem::path defaultPath;
     std::vector<SongInfo> songs;
-    int version;
 };
 
 template<>
@@ -39,26 +38,16 @@ struct matjson::Serialize<NongData> {
             songs.push_back(song);
         }
 
-        int version;
-
-        if (value.contains("version")) {
-            version = value["version"].as_int();
-        } else {
-            version = nongd::getManifestVersion();
-        }
-
         return NongData {
             .active = ghc::filesystem::path(value["active"].as_string()),
             .defaultPath = ghc::filesystem::path(value["defaultPath"].as_string()),
             .songs = songs,
-            .version = version
         };
     }
 
     static matjson::Value to_json(NongData const& value) {
         auto ret = matjson::Object();
         auto array = matjson::Array();
-        ret["version"] = value.version;
         ret["active"] = value.active.string();
         ret["defaultPath"] = value.defaultPath.string();
         for (auto song : value.songs) {
