@@ -3,20 +3,21 @@
 #include <Geode/Geode.hpp>
 #include <string>
 
+#include "../filesystem.hpp"
 #include "../manifest.hpp"
 
 using namespace geode::prelude;
 
 struct SongInfo {
-    ghc::filesystem::path path;
+    fs::path path;
     std::string songName;
     std::string authorName;
     std::string songUrl;
 };
 
 struct NongData {
-    ghc::filesystem::path active;
-    ghc::filesystem::path defaultPath;
+    fs::path active;
+    fs::path defaultPath;
     std::vector<SongInfo> songs;
 };
 
@@ -27,7 +28,7 @@ struct matjson::Serialize<NongData> {
         auto jsonSongs = value["songs"].as_array();
 
         for (auto jsonSong : jsonSongs) {
-            auto path = ghc::filesystem::path(jsonSong["path"].as_string());
+            auto path = fs::path(jsonSong["path"].as_string());
 
             SongInfo song = {
                 .path = path,
@@ -39,8 +40,8 @@ struct matjson::Serialize<NongData> {
         }
 
         return NongData {
-            .active = ghc::filesystem::path(value["active"].as_string()),
-            .defaultPath = ghc::filesystem::path(value["defaultPath"].as_string()),
+            .active = fs::path(value["active"].as_string()),
+            .defaultPath = fs::path(value["defaultPath"].as_string()),
             .songs = songs,
         };
     }
