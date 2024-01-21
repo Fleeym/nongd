@@ -6,14 +6,6 @@ on:
     branches:
       - "main"
 
-env:
-  GEODE_SDK: ${{ github.workspace }}/sdk
-  GEODE_VERSION: nightly
-  CLI_VERSION: v2.0.0
-  MOD_NAME: nongd
-  MOD_ID: fleym.nongd
-
-
 jobs:
   build:
     strategy:
@@ -23,8 +15,13 @@ jobs:
           - name: Windows
             os: windows-latest
           
-          - name: macOS
-            os: macos-latest
+          # - name: macOS
+          #   os: macos-latest
+          - name: Android32
+            os: ubuntu-latest
+          
+          - name: Android64
+            os: ubuntu-latest
     name: ${{matrix.config.name}}
     runs-on: ${{matrix.config.os}}
 
@@ -34,7 +31,9 @@ jobs:
       - name: Build the mod
         uses: geode-sdk/build-geode-mod@main
         with:
+          bindings: Fleeym/sapphire-bindings
           combine: true
+          target: ${{matrix.config.target}}
   package:
     name: Package builds
     runs-on: ubuntu-latest
