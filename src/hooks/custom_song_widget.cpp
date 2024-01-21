@@ -1,5 +1,6 @@
 #include <Geode/binding/CustomSongWidget.hpp>
 #include <Geode/modify/CustomSongWidget.hpp>
+#include <Geode/ui/GeodeUI.hpp>
 
 #include "../types/song_info.hpp"
 #include "../managers/nong_manager.hpp"
@@ -11,6 +12,8 @@ class $modify(JBSongWidget, CustomSongWidget) {
     NongData nongs;
     CCMenu* menu;
     CCLabelBMFont* label;
+    bool fetchedAssetInfo = false;
+    std::map<int, NongData> assetNongData;
 
     bool init(
         SongInfoObject* songInfo,
@@ -40,6 +43,48 @@ class $modify(JBSongWidget, CustomSongWidget) {
         this->createSongLabels();
 
         return true;
+    }
+
+    void updateSongObject(SongInfoObject* obj) {
+        CustomSongWidget::updateSongObject(obj);
+        log::info("{}", m_songs.size());
+        if (!m_fields->fetchedAssetInfo && m_songs.size() > 1) {
+            m_fields->fetchedAssetInfo = true;
+            this->getMultiAssetSongInfo();
+        }
+    }
+
+    void updateSongInfo() {
+        CustomSongWidget::updateSongInfo();
+        log::info("songinfo {}", m_songs.size());
+        if (!m_fields->fetchedAssetInfo && m_songs.size() > 1) {
+            m_fields->fetchedAssetInfo = true;
+            this->getMultiAssetSongInfo();
+        }
+    }
+
+    void getMultiAssetSongInfo() {
+        bool notAllDownloaded = false;
+        for (auto const& kv : m_songs) {
+            auto result = NongManager::get()->getNongs(kv.first);
+            if (!result.has_value()) {
+                NongManager::get()->createDefault(kv.first);
+                result = NongManager::get()->getNongs(kv.first);
+                if (!result.has_value()) {
+                    // its downloading
+                    notAllDownloaded = true;
+                    continue;
+                }
+            }
+            m_fields->assetNongData[kv.first] = result.value();
+        }
+        if (!notAllDownloaded) {
+            m_fields->fetchedAssetInfo = true;
+        }
+
+        for (auto const& kv : m_fields->assetNongData) {
+            log::info("{}: {}", kv.first, kv.second.active);
+        }
     }
 
     void createSongLabels() {
@@ -72,6 +117,13 @@ class $modify(JBSongWidget, CustomSongWidget) {
 
 
 	void addNongLayer(CCObject* target) {
+        if (m_songs.size() > 1 && !m_fields->fetchedAssetInfo) {
+            this->getMultiAssetSongInfo();
+            if (!m_fields->fetchedAssetInfo) {
+                FLAlertLayer::create("Error", "Song info isn't fetched yet. Please try again in a few seconds.", "Ok")->show();
+                return;
+            }
+        }
 		auto scene = CCDirector::sharedDirector()->getRunningScene();
 		auto layer = NongDropdownLayer::create(m_songInfoObject->m_songID, this);
         layer->m_noElasticity = true;

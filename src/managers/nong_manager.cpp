@@ -32,6 +32,14 @@ std::optional<SongInfo> NongManager::getActiveNong(int songID) {
     return std::nullopt;
 }
 
+
+void NongManager::resolveSongInfoCallback(SongInfoObject* obj) {
+    if (m_getSongInfoCallbacks.contains(obj->m_songID)) {
+        m_getSongInfoCallbacks[obj->m_songID](obj->m_songID);
+        m_getSongInfoCallbacks.erase(obj->m_songID);
+    }
+}
+
 std::vector<SongInfo> NongManager::validateNongs(int songID) {
     auto result = this->getNongs(songID);
     // Validate nong paths and delete those that don't exist anymore
@@ -152,7 +160,19 @@ void NongManager::createDefault(int songID) {
     if (m_state.m_nongs.contains(songID)) {
         return;
     }
+    log::info("creating default for {}", songID);
     SongInfoObject* songInfo = MusicDownloadManager::sharedState()->getSongInfoObject(songID);
+    if (songInfo == nullptr && !m_getSongInfoCallbacks.contains(songID)) {
+        MusicDownloadManager::sharedState()->getSongInfo(songID, true);
+        m_getSongInfoCallbacks[songID] = [this](int songID) {
+            log::info("download finished", songID);
+            this->createDefault(songID);
+        };
+        return;
+    }
+    if (songInfo == nullptr) {
+        return;
+    }
     fs::path songPath = fs::path(std::string(MusicDownloadManager::sharedState()->pathForSong(songID)));
     NongData data;
     SongInfo defaultSong;

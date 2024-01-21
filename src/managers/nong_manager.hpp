@@ -4,6 +4,7 @@
 #include <Geode/utils/web.hpp>
 #include <optional>
 #include <fstream>
+#include <map>
 
 #include "../types/song_info.hpp"
 #include "../random_string.hpp"
@@ -19,7 +20,8 @@ using namespace geode::prelude;
 class NongManager : public CCObject {
 protected:
     inline static NongManager* m_instance = nullptr;
-    NongState m_state; 
+    NongState m_state;
+    std::map<int, std::function<void(int)>> m_getSongInfoCallbacks;
 
     bool addNongsFromSFH(std::vector<SFHItem> const& songs, int songID);
 public:
@@ -27,6 +29,7 @@ public:
      * Only used once, on game launch
     */
     void loadSongs();
+    void resolveSongInfoCallback(SongInfoObject* obj);
 
     /**
      * Adds a NONG to the JSON of a songID
