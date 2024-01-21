@@ -33,7 +33,7 @@ jobs:
       - name: Build the mod
         uses: geode-sdk/build-geode-mod@main
         with:
-          bindings: fleeym/sapphire-bindings@main
+          bindings: fleeym/sapphire-bindings
           combine: true
           target: ${{matrix.config.target}}
   package:
