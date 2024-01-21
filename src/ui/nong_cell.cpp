@@ -10,6 +10,7 @@ bool NongCell::init(SongInfo info, NongDropdownLayer* parentPopup, CCSize const&
 
     if (selected) {
         auto sprite = ButtonSprite::create("Set", "goldFont.fnt", "GJ_button_02.png");
+        sprite->setScale(0.7f);
         button = CCMenuItemSpriteExtra::create(
             sprite,
             this,
@@ -17,11 +18,12 @@ bool NongCell::init(SongInfo info, NongDropdownLayer* parentPopup, CCSize const&
             nullptr
         );
     } else {
+        auto sprite = ButtonSprite::create("Set");
+        sprite->setScale(0.7f);
         button = CCMenuItemSpriteExtra::create(
-            ButtonSprite::create("Set"),
+            sprite,
             this,
-            // menu_selector(NongCell::onSet)
-            nullptr
+            menu_selector(NongCell::onSet)
         );
     }
     button->setAnchorPoint(ccp(0.5f, 0.5f));
@@ -31,19 +33,20 @@ bool NongCell::init(SongInfo info, NongDropdownLayer* parentPopup, CCSize const&
     menu->addChild(button);
 
     if (!isDefault) {
+        auto sprite = CCSprite::createWithSpriteFrameName("GJ_deleteIcon_001.png");
+        sprite->setScale(0.7f);
         auto deleteButton = CCMenuItemSpriteExtra::create(
-            CCSprite::createWithSpriteFrameName("GJ_deleteIcon_001.png"),
+            sprite,
             this,
-            nullptr
-            // menu_selector(NongCell::deleteSong)
+            menu_selector(NongCell::deleteSong)
         );
         deleteButton->setID("delete-button");
         menu->addChild(deleteButton);
-        deleteButton->setPositionX(53.f);
+        deleteButton->setPositionX(38.f);
     }
 
     menu->setAnchorPoint(ccp(0, 0));
-    menu->setPosition(ccp(280.f, 30.f));
+    menu->setPosition(ccp(267.f, 30.f));
     menu->setID("button-menu");
     this->addChild(menu);
 
@@ -96,6 +99,6 @@ NongCell* NongCell::create(SongInfo info, NongDropdownLayer* parentPopup, CCSize
 
 void NongCell::FLAlert_Clicked(FLAlertLayer* layer, bool btn2) {
     if (btn2) {
-        // m_parentPopup->deleteSong(m_songInfo);
+        m_parentPopup->deleteSong(m_songInfo);
     }
 }

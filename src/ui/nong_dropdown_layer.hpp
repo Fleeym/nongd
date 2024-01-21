@@ -7,6 +7,7 @@
 #include "../types/fetch_status.hpp"
 #include "../types/nong_list_type.hpp"
 #include "../managers/nong_manager.hpp"
+#include "nong_add_popup.hpp"
 #include "nong_cell.hpp"
 #include "song_cell.hpp"
 
@@ -46,7 +47,6 @@ public:
     void deleteSong(SongInfo const& song);
     void addSong(SongInfo const& song);
     void updateParentWidget(SongInfo const& song);
-    void updateParentSizeAndIDLabel(SongInfo const& song, int songID = 0);
 
     static NongDropdownLayer* create(std::vector<int> ids, CustomSongWidget* parent, int defaultSongID) {
         auto ret = new NongDropdownLayer;

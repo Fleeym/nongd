@@ -5,20 +5,32 @@
 #include "../types/song_info.hpp"
 
 class $modify(MusicDownloadManager) {
-// 	gd::string pathForSong(int id) {
-// 		if (!NongManager::get()->checkIfNongsExist(id)) {
-// 			return MusicDownloadManager::pathForSong(id);
-// 		}
-// 		auto currentData = NongManager::get()->getNongs(id);
-// 		if (ghc::filesystem::exists(currentData.active)) {
-// 			return currentData.active.string();
-// 		}
-// 		return MusicDownloadManager::pathForSong(id);
-// 	}
+	gd::string pathForSong(int id) {
+        auto active = NongManager::get()->getActiveNong(id);
+        if (!active.has_value()) {
+		    return MusicDownloadManager::pathForSong(id);
+        }
+        auto value = active.value();
+		if (!fs::exists(value.path)) {
+		    return MusicDownloadManager::pathForSong(id);
+		}
+		return value.path.string();
+	}
     void onGetSongInfoCompleted(gd::string p1, gd::string p2) {
         MusicDownloadManager::onGetSongInfoCompleted(p1, p2);
         auto songID = std::stoi(p2);
         auto songInfo = MusicDownloadManager::sharedState()->getSongInfoObject(songID);
         NongManager::get()->resolveSongInfoCallback(songInfo);
+    }
+
+    SongInfoObject* getSongInfoObject(int id) {
+        auto og = MusicDownloadManager::getSongInfoObject(id);
+        auto active = NongManager::get()->getActiveNong(id);
+        if (active.has_value()) {
+            auto value = active.value();
+            og->m_songName = value.songName;
+            og->m_artistName = value.authorName;
+        }
+        return og;
     }
 };

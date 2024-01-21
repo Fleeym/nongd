@@ -1,5 +1,6 @@
 #include <Geode/binding/CustomSongWidget.hpp>
 #include <Geode/modify/CustomSongWidget.hpp>
+#include <Geode/modify/LevelInfoLayer.hpp>
 #include <Geode/ui/GeodeUI.hpp>
 
 #include "../types/song_info.hpp"
@@ -11,7 +12,8 @@ using namespace geode::prelude;
 class $modify(JBSongWidget, CustomSongWidget) {
     NongData nongs;
     CCMenu* menu;
-    CCLabelBMFont* label;
+    CCMenuItemSpriteExtra* songNameLabel;
+    CCLabelBMFont* sizeIdLabel;
     bool fetchedAssetInfo = false;
     std::map<int, NongData> assetNongData;
 
@@ -32,6 +34,7 @@ class $modify(JBSongWidget, CustomSongWidget) {
         if (isRobtopSong) {
             return true;
         }
+
         m_songLabel->setVisible(false);
         auto result = NongManager::get()->getNongs(songInfo->m_songID);
         if (!result.has_value()) {
@@ -47,15 +50,18 @@ class $modify(JBSongWidget, CustomSongWidget) {
 
     void updateSongObject(SongInfoObject* obj) {
         CustomSongWidget::updateSongObject(obj);
-        if (!m_fields->fetchedAssetInfo && m_songs.size() > 1) {
-            m_fields->fetchedAssetInfo = true;
-            this->getMultiAssetSongInfo();
+        this->createSongLabels();
+        auto active = NongManager::get()->getActiveNong(obj->m_songID).value();
+        auto data = NongManager::get()->getNongs(obj->m_songID).value();
+        if (active.path != data.defaultPath) {
+            m_deleteBtn->setVisible(false);
+        } else {
+            m_deleteBtn->setVisible(true);
         }
     }
 
     void updateSongInfo() {
         CustomSongWidget::updateSongInfo();
-        log::info("songinfo {}", m_songs.size());
         if (!m_fields->fetchedAssetInfo && m_songs.size() > 1) {
             m_fields->fetchedAssetInfo = true;
             this->getMultiAssetSongInfo();
@@ -85,12 +91,15 @@ class $modify(JBSongWidget, CustomSongWidget) {
     void createSongLabels() {
         int songID = m_songInfoObject->m_songID;
         auto active = NongManager::get()->getActiveNong(songID).value();
+        if (m_fields->menu != nullptr) {
+            m_fields->menu->removeFromParent();
+            m_fields->songNameLabel->removeFromParent();
+        }
 		auto menu = CCMenu::create();
 		menu->setID("song-name-menu");
 
 		auto label = CCLabelBMFont::create(active.songName.c_str(), "bigFont.fnt");
 		label->limitLabelWidth(220.f, 0.8f, 0.1f);
-        m_fields->label = label;
 		auto songNameMenuLabel = CCMenuItemSpriteExtra::create(
 			label,
 			this,
@@ -102,14 +111,49 @@ class $modify(JBSongWidget, CustomSongWidget) {
 		songNameMenuLabel->setID("song-name-label");
 		songNameMenuLabel->setPosition(ccp(0.f, 0.f));
 		songNameMenuLabel->setAnchorPoint(ccp(0.f, 0.5f));
+        m_fields->songNameLabel = songNameMenuLabel;
 		menu->addChild(songNameMenuLabel);
 		menu->setContentSize(ccp(220.f, 25.f));
 		menu->setPosition(ccp(-140.f, 27.5f));
 		songNameMenuLabel->setContentSize({ 220.f, labelScale * 30 });
         m_fields->menu = menu;
 		this->addChild(menu);
-    }
 
+        if (!m_fields->fetchedAssetInfo && m_sfx.size() == 0) {
+            if (m_fields->sizeIdLabel != nullptr) {
+                m_fields->sizeIdLabel->removeFromParent();
+            }
+            auto data = NongManager::get()->getNongs(songID).value();
+
+    		if (!fs::exists(active.path) && active.path == data.defaultPath) {
+                m_songIDLabel->setVisible(true);
+    			return;
+    		} else if (m_songIDLabel) {
+    			m_songIDLabel->setVisible(false);
+    		}
+
+    		std::string sizeText;
+    		if (fs::exists(active.path)) {
+    			sizeText = NongManager::get()->getFormattedSize(active);
+    		} else {
+    			sizeText = "NA";
+    		}
+    		std::string labelText;
+    		if (active.path == data.defaultPath) {
+    			labelText = "SongID: " + std::to_string(songID) + "  Size: " + sizeText;
+    		} else {
+    			labelText = "SongID: NONG  Size: " + sizeText;
+    		}
+
+            auto label = CCLabelBMFont::create(labelText.c_str(), "bigFont.fnt");
+            label->setID("nongd-id-and-size-label");
+            label->setPosition(ccp(-139.f, -31.f));
+            label->setAnchorPoint({0, 0.5f});
+            label->setScale(0.4f);
+            this->addChild(label);
+            m_fields->sizeIdLabel = label;
+        }
+    }
 
 	void addNongLayer(CCObject* target) {
         if (m_songs.size() > 1 && !m_fields->fetchedAssetInfo) {
@@ -133,6 +177,21 @@ class $modify(JBSongWidget, CustomSongWidget) {
 		layer->setZOrder(106);
         layer->show();
 	}
+};
+
+class $modify(JBLevelInfoLayer, LevelInfoLayer) {
+    bool init(GJGameLevel* level, bool p1) {
+        if (!LevelInfoLayer::init(level, p1)) {
+            return false;
+        }
+        if (Mod::get()->getSavedValue("show-tutorial", true) && GameManager::get()->m_levelEditorLayer == nullptr) {
+            auto popup = FLAlertLayer::create("Jukebox", "Thank you for using <co>Jukebox</c>! To begin swapping songs, click on the <cr>song name</c>!", "Ok");
+            Mod::get()->setSavedValue("show-tutorial", false);
+            popup->m_scene = this;
+            popup->show();
+        }
+        return true;
+    }
 };
 
 // class $modify(NongSongWidget, CustomSongWidget) {

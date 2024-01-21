@@ -31,6 +31,4 @@ public:
         return nullptr;
     }
     void onSelectSong(CCObject*);
-    // void onSet(CCObject*);
-    // void deleteSong(CCObject*);
 };
