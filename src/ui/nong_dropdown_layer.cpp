@@ -1,173 +1,195 @@
-// #include "nong_dropdown_layer.hpp"
+#include "nong_dropdown_layer.hpp"
 
-// void NongDropdownLayer::setup() {
-//     m_songs = NongManager::get()->getNongs(m_songID);
-//     auto winsize = CCDirector::sharedDirector()->getWinSize();
+bool NongDropdownLayer::setup(int songID, CustomSongWidget* parent) {
+    m_songID = songID;
+    m_parentWidget = parent;
+    auto result = NongManager::get()->getNongs(m_songID);
+    if (!result.has_value()) {
+        NongManager::get()->createDefault(m_songID);
+        NongManager::get()->writeJson();
+        result = NongManager::get()->getNongs(m_songID);
+    }
+    m_songs = result.value();
+    auto winsize = CCDirector::sharedDirector()->getWinSize();
 
-//     auto spr = CCSprite::createWithSpriteFrameName("GJ_downloadBtn_001.png");
-//     auto menu = CCMenu::create();
-//     menu->setID("bottom-right-menu");
-//     auto downloadBtn = CCMenuItemSpriteExtra::create(
-//         spr,
-//         this,
-//         menu_selector(NongDropdownLayer::fetchSongFileHub)
-//     );
-//     spr = CCSprite::createWithSpriteFrameName("GJ_plusBtn_001.png");
-//     auto addBtn = CCMenuItemSpriteExtra::create(
-//         spr,
-//         this,
-//         menu_selector(NongDropdownLayer::openAddPopup)
-//     );
-//     spr = CCSprite::createWithSpriteFrameName("GJ_trashBtn_001.png");
-//     auto removeBtn = CCMenuItemSpriteExtra::create(
-//         spr,
-//         this,
-//         menu_selector(NongDropdownLayer::deleteAllNongs)
-//     );
+    auto spr = CCSprite::createWithSpriteFrameName("GJ_downloadBtn_001.png");
+    spr->setScale(0.7f);
+    auto menu = CCMenu::create();
+    menu->setID("bottom-right-menu");
+    auto downloadBtn = CCMenuItemSpriteExtra::create(
+        spr,
+        this,
+        // menu_selector(NongDropdownLayer::fetchSongFileHub)
+        nullptr
+    );
+    downloadBtn->setPositionY(35.f);
+    spr = CCSprite::createWithSpriteFrameName("GJ_plusBtn_001.png");
+    spr->setScale(0.7f);
+    auto addBtn = CCMenuItemSpriteExtra::create(
+        spr,
+        this,
+        // menu_selector(NongDropdownLayer::openAddPopup)
+        nullptr
+    );
+    spr = CCSprite::createWithSpriteFrameName("GJ_trashBtn_001.png");
+    spr->setScale(0.7f);
+    auto removeBtn = CCMenuItemSpriteExtra::create(
+        spr,
+        this,
+        // menu_selector(NongDropdownLayer::deleteAllNongs)
+        nullptr
+    );
+    removeBtn->setPositionY(67.f);
 
-//     auto layout = ColumnLayout::create();
-//     layout->setGap(5.f);
-//     layout->setAxisAlignment(AxisAlignment::Start);
-//     menu->setLayout(layout);
-//     menu->addChild(addBtn);
-//     menu->addChild(downloadBtn);
-//     menu->addChild(removeBtn);
-//     menu->setPosition(winsize.width - 30.f, 165.f);
-//     menu->updateLayout();
-//     m_mainLayer->addChild(menu);
+    menu->addChild(addBtn);
+    menu->addChild(downloadBtn);
+    menu->addChild(removeBtn);
+    menu->setPosition(winsize.width / 2 + 185.f, winsize.height / 2 - 105.f);
+    m_mainLayer->addChild(menu);
 
-//     menu = CCMenu::create();
-//     menu->setID("settings-menu");
-//     auto sprite = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
-//     sprite->setScale(0.8f);
-//     auto settingsButton = CCMenuItemSpriteExtra::create(
-//         sprite,
-//         this,
-//         menu_selector(NongDropdownLayer::onSettings)
-//     );
-//     settingsButton->setID("settings-button");
-//     menu->addChild(settingsButton);
-//     menu->setPosition(winsize.width - 30.f, winsize.height - 31.f);
-//     m_mainLayer->addChild(menu);
+    menu = CCMenu::create();
+    menu->setID("settings-menu");
+    auto sprite = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
+    sprite->setScale(0.8f);
+    auto settingsButton = CCMenuItemSpriteExtra::create(
+        sprite,
+        this,
+        menu_selector(NongDropdownLayer::onSettings)
+    );
+    settingsButton->setID("settings-button");
+    menu->addChild(settingsButton);
+    menu->setPosition(winsize.width - 30.f, winsize.height - 31.f);
+    m_mainLayer->addChild(menu);
 
-//     this->createList();
-// }
+    this->createList();
+    auto listpos = m_listView->getPosition();
+    auto leftspr = CCSprite::createWithSpriteFrameName("GJ_commentSide2_001.png");
+    leftspr->setPosition(ccp(listpos.x - 162.f, listpos.y));
+    leftspr->setScaleY(6.8f);
+    m_mainLayer->addChild(leftspr);
+    auto rightspr = CCSprite::createWithSpriteFrameName("GJ_commentSide2_001.png");
+    rightspr->setPosition(ccp(listpos.x + 162.f, listpos.y));
+    rightspr->setScaleY(6.8f);
+    rightspr->setFlipX(true);
+    m_mainLayer->addChild(rightspr);
+    auto bottomspr = CCSprite::createWithSpriteFrameName("GJ_commentTop2_001.png");
+    bottomspr->setPosition(ccp(listpos.x, listpos.y - 95.f));
+    bottomspr->setFlipY(true);
+    bottomspr->setScaleX(0.934f);
+    m_mainLayer->addChild(bottomspr);
+    auto topspr = CCSprite::createWithSpriteFrameName("GJ_commentTop2_001.png");
+    topspr->setPosition(ccp(listpos.x, listpos.y + 95.f));
+    topspr->setScaleX(0.934f);
+    m_mainLayer->addChild(topspr);
+    auto title = CCSprite::create("JB_ListLogo.png"_spr);
+    title->setPosition(ccp(winsize.width / 2, winsize.height / 2 + 125.f));
+    title->setScale(2.15f);
+    m_mainLayer->addChild(title);
+    return true;
+}
 
-// void NongDropdownLayer::hideLayer(bool p1) {
-//     if (m_fetching) {
-//         return;
-//     }
-
-//     GJDropDownLayer::hideLayer(p1);
-// }
-
-// void NongDropdownLayer::onSettings(CCObject* sender) {
-//     geode::openSettingsPopup(Mod::get());
-// }
+void NongDropdownLayer::onSettings(CCObject* sender) {
+    geode::openSettingsPopup(Mod::get());
+}
 
 // void NongDropdownLayer::openAddPopup(CCObject* target) {
 //     NongAddPopup::create(this)->show();
 // }
 
-// void NongDropdownLayer::createList() {
-//     auto songs = CCArray::create();
-//     auto activeSong = this->getActiveSong();
+void NongDropdownLayer::createList() {
+    auto songs = CCArray::create();
+    auto activeSong = this->getActiveSong();
 
-//     songs->addObject(NongCell::create(activeSong, this, this->getCellSize(), true, activeSong.path == m_songs.defaultPath));
+    songs->addObject(NongCell::create(activeSong, this, this->getCellSize(), true, activeSong.path == m_songs.defaultPath));
 
-//     for (auto song : m_songs.songs) {
-//         if (m_songs.active == song.path) {
-//             continue;
-//         }
-//         songs->addObject(NongCell::create(song, this, this->getCellSize(), false, song.path == m_songs.defaultPath));
-//     }
-//     if (m_listLayer->m_listView) {
-//         m_listLayer->m_listView->removeFromParent();
-//     }
+    for (auto song : m_songs.songs) {
+        // if (m_songs.active == song.path) {
+        //     continue;
+        // }
+        songs->addObject(NongCell::create(song, this, this->getCellSize(), false, song.path == m_songs.defaultPath));
+    }
+    if (m_listView) {
+        m_listView->removeFromParent();
+    }
 
-//     auto list = ListView::create(songs, this->getCellSize().height, this->getCellSize().width);
-//     m_listLayer->addChild(list);
-//     m_listLayer->m_listView = list;
-// }
+    auto list = ListView::create(songs, this->getCellSize().height, this->getCellSize().width, 200.f);
+    m_mainLayer->addChild(list);
+    auto winsize = CCDirector::sharedDirector()->getWinSize();
+    list->setPosition(winsize.width / 2, winsize.height / 2 - 15.f);
+    list->ignoreAnchorPointForPosition(false);
+    m_listView = list;
+}
 
-// SongInfo NongDropdownLayer::getActiveSong() {
-//     for (auto song : m_songs.songs) {
-//         if (song.path == m_songs.active) {
-//             return song;
-//         }
-//     }
+SongInfo NongDropdownLayer::getActiveSong() {
+    auto active = NongManager::get()->getActiveNong(m_songID);
+    if (!active.has_value()) {
+        m_songs.active = m_songs.defaultPath;
+        NongManager::get()->saveNongs(m_songs, m_songID);
+        return NongManager::get()->getActiveNong(m_songID).value();
+    }
+    return active.value();
+}
+
+CCSize NongDropdownLayer::getCellSize() const {
+    return {
+        320.f,
+        60.f
+    };
+}
+
+void NongDropdownLayer::setActiveSong(SongInfo const& song) {
+    if (
+        !fs::exists(song.path) && 
+        song.path != m_songs.defaultPath &&
+        song.songUrl != "local"
+    ) {
+        auto loading = LoadingCircle::create();
+        loading->setParentLayer(this);
+        loading->setFade(true);
+        loading->show();
+        m_fetching = true;
+        NongManager::get()->downloadSong(song, [this, song, loading](double progress) {
+            if (progress == 100.f) {
+                m_fetching = false;
+                this->updateParentWidget(song);
+                loading->fadeAndRemove();
+            }
+        },
+        [this, loading](SongInfo const& song, std::string const& error) {
+            loading->fadeAndRemove();
+            m_fetching = false;
+            FLAlertLayer::create("Failed", "Failed to download song", "Ok")->show();
+
+            for (auto song : m_songs.songs) {
+                if (song.path == m_songs.defaultPath) {
+                    this->setActiveSong(song);
+                }
+            }
+        });
+    }
+
+    m_songs.active = song.path;
+
+    this->saveSongsToJson();
     
-//     m_songs.active = m_songs.defaultPath;
-//     NongManager::get()->saveNongs(m_songs, this->m_songID);
-//     for (auto song : m_songs.songs) {
-//         if (song.path == m_songs.active) {
-//             return song;
-//         }
-//     }
+    this->updateParentWidget(song);
 
-//     throw std::runtime_error("If you somehow reached this, good job.");
-// }
+    this->createList();
+}
 
-// CCSize NongDropdownLayer::getCellSize() const {
-//     return {
-//         m_listLayer->getContentSize().width,
-//         60.f
-//     };
-// }
-
-// void NongDropdownLayer::setActiveSong(SongInfo const& song) {
-//     if (
-//         !ghc::filesystem::exists(song.path) && 
-//         song.path != m_songs.defaultPath &&
-//         song.songUrl != "local"
-//     ) {
-//         auto loading = LoadingCircle::create();
-//         loading->setParentLayer(this);
-//         loading->setFade(true);
-//         loading->show();
-//         m_fetching = true;
-//         NongManager::get()->downloadSong(song, [this, song, loading](double progress) {
-//             if (progress == 100.f) {
-//                 m_fetching = false;
-//                 this->updateParentWidget(song);
-//                 loading->fadeAndRemove();
-//             }
-//         },
-//         [this, loading](SongInfo const& song, std::string const& error) {
-//             loading->fadeAndRemove();
-//             m_fetching = false;
-//             FLAlertLayer::create("Failed", "Failed to download song", "Ok")->show();
-
-//             for (auto song : m_songs.songs) {
-//                 if (song.path == m_songs.defaultPath) {
-//                     this->setActiveSong(song);
-//                 }
-//             }
-//         });
-//     }
-
-//     m_songs.active = song.path;
-
-//     this->saveSongsToJson();
-    
-//     this->updateParentWidget(song);
-
-//     this->createList();
-// }
-
-// void NongDropdownLayer::updateParentWidget(SongInfo const& song) {
-//     m_parentWidget->m_songInfo->m_artistName = song.authorName;
-//     m_parentWidget->m_songInfo->m_songName = song.songName;
-//     if (song.songUrl != "local") {
-//         m_parentWidget->m_songInfo->m_songURL = song.songUrl;
-//     }
-//     m_parentWidget->updateSongObject(this->m_parentWidget->m_songInfo);
-//     if (m_songs.defaultPath == song.path) {
-//         this->updateParentSizeAndIDLabel(song, m_songID);
-//     } else {
-//         this->updateParentSizeAndIDLabel(song);
-//     }
-// }
+void NongDropdownLayer::updateParentWidget(SongInfo const& song) {
+    m_parentWidget->m_songInfoObject->m_artistName = song.authorName;
+    m_parentWidget->m_songInfoObject->m_songName = song.songName;
+    if (song.songUrl != "local") {
+        m_parentWidget->m_songInfoObject->m_songUrl = song.songUrl;
+    }
+    m_parentWidget->updateSongObject(this->m_parentWidget->m_songInfoObject);
+    // if (m_songs.defaultPath == song.path) {
+    //     this->updateParentSizeAndIDLabel(song, m_songID);
+    // } else {
+    //     this->updateParentSizeAndIDLabel(song);
+    // }
+}
 
 // void NongDropdownLayer::updateParentSizeAndIDLabel(SongInfo const& song, int songID) {
 //     auto label = typeinfo_cast<CCLabelBMFont*>(m_parentWidget->getChildByID("nongd-id-and-size-label"));
@@ -208,9 +230,9 @@
 //     this->createList();
 // }
 
-// void NongDropdownLayer::saveSongsToJson() {
-//     NongManager::get()->saveNongs(m_songs, m_songID);
-// }
+void NongDropdownLayer::saveSongsToJson() {
+    NongManager::get()->saveNongs(m_songs, m_songID);
+}
 
 // void NongDropdownLayer::onSFHFetched(nongd::FetchStatus result) {
 //     switch (result) {

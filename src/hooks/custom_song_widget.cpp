@@ -1,13 +1,17 @@
 #include <Geode/binding/CustomSongWidget.hpp>
 #include <Geode/modify/CustomSongWidget.hpp>
 
-// #include "../types/song_info.hpp"
-// #include "../managers/nong_manager.hpp"
-// #include "../ui/nong_dropdown_layer.hpp"
+#include "../types/song_info.hpp"
+#include "../managers/nong_manager.hpp"
+#include "../ui/nong_dropdown_layer.hpp"
 
 using namespace geode::prelude;
 
 class $modify(JBSongWidget, CustomSongWidget) {
+    NongData nongs;
+    CCMenu* menu;
+    CCLabelBMFont* label;
+
     bool init(
         SongInfoObject* songInfo,
         CustomSongDelegate* songDelegate,
@@ -25,11 +29,56 @@ class $modify(JBSongWidget, CustomSongWidget) {
         if (isRobtopSong) {
             return true;
         }
-
-        log::info("This works!");
+        m_songLabel->setVisible(false);
+        auto result = NongManager::get()->getNongs(songInfo->m_songID);
+        if (!result.has_value()) {
+            NongManager::get()->createDefault(songInfo->m_songID);
+            NongManager::get()->writeJson();
+            result = NongManager::get()->getNongs(songInfo->m_songID);
+        }
+        m_fields->nongs = result.value();
+        this->createSongLabels();
 
         return true;
     }
+
+    void createSongLabels() {
+        int songID = m_songInfoObject->m_songID;
+        auto active = NongManager::get()->getActiveNong(songID).value();
+		auto menu = CCMenu::create();
+		menu->setID("song-name-menu");
+
+		auto label = CCLabelBMFont::create(active.songName.c_str(), "bigFont.fnt");
+		label->limitLabelWidth(220.f, 0.8f, 0.1f);
+        m_fields->label = label;
+		auto songNameMenuLabel = CCMenuItemSpriteExtra::create(
+			label,
+			this,
+            menu_selector(JBSongWidget::addNongLayer)
+		);
+		songNameMenuLabel->setTag(songID);
+// 		// I am not even gonna try and understand why this works, but this places the label perfectly in the menu
+		auto labelScale = label->getScale();
+		songNameMenuLabel->setID("song-name-label");
+		songNameMenuLabel->setPosition(ccp(0.f, 0.f));
+		songNameMenuLabel->setAnchorPoint(ccp(0.f, 0.5f));
+		menu->addChild(songNameMenuLabel);
+		menu->setContentSize(ccp(220.f, 25.f));
+		menu->setPosition(ccp(-140.f, 27.5f));
+		songNameMenuLabel->setContentSize({ 220.f, labelScale * 30 });
+        m_fields->menu = menu;
+		this->addChild(menu);
+    }
+
+
+	void addNongLayer(CCObject* target) {
+		auto scene = CCDirector::sharedDirector()->getRunningScene();
+		auto layer = NongDropdownLayer::create(m_songInfoObject->m_songID, this);
+        layer->m_noElasticity = true;
+		// based robtroll
+		layer->setZOrder(106);
+        layer->show();
+	}
 };
 
 // class $modify(NongSongWidget, CustomSongWidget) {

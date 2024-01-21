@@ -23,5 +23,10 @@
 			"description": "Allows mashups to be downloaded from Song File Hub",
 			"default": true
 		}
+	},
+	"resources": {
+		"sprites": [
+			"resources/*.png"
+		]
 	}
 }
