@@ -1,6 +1,6 @@
 #include "list_cell.hpp"
 
-bool ListCell::init(CCLayer* layer, CCSize const& size) {
+bool JBListCell::init(CCLayer* layer, CCSize const& size) {
     m_width = size.width;
     m_height = size.height;
     m_layer = layer;
@@ -9,6 +9,6 @@ bool ListCell::init(CCLayer* layer, CCSize const& size) {
     return true;
 }
 
-void ListCell::draw() {
+void JBListCell::draw() {
     reinterpret_cast<StatsCell*>(this)->StatsCell::draw();
 }

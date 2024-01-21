@@ -33,7 +33,6 @@ bool NongAddPopup::setup(NongDropdownLayer* parent) {
     m_containerLayer->addChild(this->m_selectSongMenu);
     m_containerLayer->addChild(this->m_addSongMenu);
     m_mainLayer->addChild(this->m_containerLayer);
-    this->createSelectedSongLabel("Select a file...");
     this->createInputs();
 
     return true;
@@ -62,26 +61,9 @@ void NongAddPopup::openFile(CCObject* target) {
 
     if (auto file = file::pickFile(file::PickMode::OpenFile, options)) {
         m_songPath = file.unwrap();
-        this->createSelectedSongLabel(m_songPath.string());
     } else if (file.unwrapErr() != "Dialog cancelled") {
         FLAlertLayer::create("Failed to import mp3!", file.unwrapErr(), "Ok")->show();
     }
-}
-
-void NongAddPopup::createSelectedSongLabel(const std::string& label) {
-    if (auto label = m_containerLayer->getChildByID("selected-song-label")) {
-        m_containerLayer->removeChild(label);
-    }
-
-    m_selectedSongPath = CCLabelBMFont::create(label.c_str(), "goldFont.fnt");
-    m_selectedSongPath->setID("selected-song-label");
-    m_selectedSongPath->setScale(0.5f);
-    auto center = CCDirector::sharedDirector()->getWinSize() / 2;
-    m_selectedSongPath->setPosition(center.width, center.height + this->getPopupSize().height / 2 - 45.f);
-    m_selectedSongPath->limitLabelWidth(300.f, 0.6f, 0.1f);
-    m_selectedSongPath->setLineBreakWithoutSpace(true);
-
-    m_containerLayer->addChild(this->m_selectedSongPath);
 }
 
 void NongAddPopup::createInputs() {
@@ -99,7 +81,7 @@ void NongAddPopup::createInputs() {
     m_songNameInput = CCTextInputNode::create(250.f, 30.f, "Song name", "bigFont.fnt");
     m_songNameInput->setID("song-name-input");
     m_songNameInput->setPosition(centered);
-    m_songNameInput->ignoreAnchorPointForPosition(false);
+    m_songNameInput->ignoreAnchorPointForPosition(true);
     m_songNameInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
     m_songNameInput->m_placeholderLabel->setAnchorPoint({ 0.5f, 0.5f });
     m_songNameInput->setMaxLabelScale(0.7f);
@@ -113,7 +95,7 @@ void NongAddPopup::createInputs() {
     m_artistNameInput = CCTextInputNode::create(250.f, 30.f, "Artist name", "bigFont.fnt");
     m_artistNameInput->setID("artist-name-input");
     m_artistNameInput->setPosition(centered.width, centered.height - 50.f);
-    m_artistNameInput->ignoreAnchorPointForPosition(false);
+    m_artistNameInput->ignoreAnchorPointForPosition(true);
     m_artistNameInput->setMaxLabelScale(0.7f);
     m_artistNameInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
     m_artistNameInput->m_placeholderLabel->setAnchorPoint({ 0.5f, 0.5f });
@@ -136,12 +118,12 @@ void NongAddPopup::createInputs() {
 void NongAddPopup::addSong(CCObject* target) {
     auto artistName = std::string(m_artistNameInput->getString());
     auto songName = std::string(m_songNameInput->getString());
-    if (!ghc::filesystem::exists(m_songPath)) {
+    if (!fs::exists(m_songPath)) {
         FLAlertLayer::create("Error", "The selected file is invalid!", "Ok")->show();
         return;
     }
 
-    if (ghc::filesystem::is_directory(m_songPath)) {
+    if (fs::is_directory(m_songPath)) {
         FLAlertLayer::create("Error", "You selected a directory!", "Ok")->show();
         return;
     }
@@ -163,14 +145,15 @@ void NongAddPopup::addSong(CCObject* target) {
 
     auto unique = nongd::random_string(16);
     auto fileName = m_songPath.stem().string() + "_" + unique + ".mp3";
-    auto destination = Mod::get()->getSaveDir() / "nongs";
-    if (!ghc::filesystem::exists(destination)) {
-        ghc::filesystem::create_directory(destination);
+    auto savedir = fs::path(Mod::get()->getSaveDir().string());
+    auto destination = savedir / "nongs";
+    if (!fs::exists(destination)) {
+        fs::create_directory(destination);
     }
     destination.append(fileName);
     bool result;
     try {
-        result = ghc::filesystem::copy_file(m_songPath, destination);
+        result = fs::copy_file(m_songPath, destination);
     } catch (...) {
         FLAlertLayer::create("Error", "Failed to save song. Please try again!", "Ok")->show();
         return;

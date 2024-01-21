@@ -2,6 +2,9 @@
 
 #include <Geode/Geode.hpp>
 #include <Geode/utils/web.hpp>
+#include <optional>
+#include <fstream>
+#include <map>
 
 #include "../types/song_info.hpp"
 #include "../random_string.hpp"
@@ -9,15 +12,25 @@
 #include "../types/fetch_status.hpp"
 #include "../types/sfh_item.hpp"
 #include "../manifest.hpp"
+#include "../types/nong_state.hpp"
+#include "../filesystem.hpp"
 
 using namespace geode::prelude;
 
 class NongManager : public CCObject {
 protected:
     inline static NongManager* m_instance = nullptr;
+    NongState m_state;
+    std::map<int, std::function<void(int)>> m_getSongInfoCallbacks;
 
-    void addNongsFromSFH(std::vector<SFHItem> const& songs, int songID);
+    bool addNongsFromSFH(std::vector<SFHItem> const& songs, int songID);
 public:
+    /**
+     * Only used once, on game launch
+    */
+    void loadSongs();
+    void resolveSongInfoCallback(SongInfoObject* obj);
+
     /**
      * Adds a NONG to the JSON of a songID
      * 
@@ -35,20 +48,12 @@ public:
     void deleteNong(SongInfo const& song, int songID);
 
     /**
-     * Checks if any NONGS exist for a songID
-     * 
-     * @param songID the id of the song
-     * @return true if the json exists, false otherwise
-    */
-    bool checkIfNongsExist(int songID);
-
-    /**
-     * Fetches all NONG data from the songID JSON
+     * Fetches all NONG data for a certain songID
      * 
      * @param songID the id of the song
      * @return the data from the JSON
     */
-    NongData getNongs(int songID);
+    std::optional<NongData> getNongs(int songID);
 
     /**
      * Fetches the active song from the songID JSON
@@ -58,7 +63,7 @@ public:
      * 
      * @throw std::exception if no nong is set as active
     */
-    SongInfo getActiveNong(int songID);
+    std::optional<SongInfo> getActiveNong(int songID);
 
     /**
      * Validates any local nongs that have an invalid path
@@ -78,12 +83,16 @@ public:
     void saveNongs(NongData const& data, int songID);
 
     /**
+     * Writes song data to the JSON
+    */
+    void writeJson();
+
+    /**
      * Removes all NONG data for a song ID
      * 
      * @param songID the id of the song
-     * @returns the saved data
     */
-    NongData deleteAll(int songID);
+    void deleteAll(int songID);
 
     /**
      * Formats a size in bytes to a x.xxMB string
@@ -97,10 +106,9 @@ public:
     /**
      * Creates the JSON file for a songID and adds the default song to it
      * 
-     * @param song the default song, fetched from GD
      * @param songID the id of the song
     */
-    void createDefaultSongIfNull(SongInfo const& song, int songID);
+    void createDefault(int songID);
 
     /**
      * Fetches song data from Song File Hub for a songID
@@ -120,13 +128,11 @@ public:
     void downloadSong(SongInfo const& song, std::function<void(double)> progress, std::function<void(SongInfo const&, std::string const&)> failed);
     
     /**
-     * Returns the JSON path for a songID
-     * 
-     * @param songID the id of the song
+     * Returns the savefile path
      * 
      * @return the path of the JSON
     */
-    ghc::filesystem::path getJsonPath(int songID);
+    fs::path getJsonPath();
 
     static NongManager* get() {
         if (m_instance == nullptr) {

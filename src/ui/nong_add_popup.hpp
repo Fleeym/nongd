@@ -17,16 +17,14 @@ protected:
     CCMenuItemSpriteExtra* m_addSongButton;
     CCMenu* m_selectSongMenu;
     CCMenu* m_addSongMenu;
-    CCLabelBMFont* m_selectedSongPath;
     CCLayer* m_containerLayer;
 
     CCTextInputNode* m_songNameInput;
     CCTextInputNode* m_artistNameInput;
 
-    ghc::filesystem::path m_songPath;
+    fs::path m_songPath;
 
     bool setup(NongDropdownLayer* parent) override;
-    void createSelectedSongLabel(const std::string&);
     void createInputs();
 
     CCSize getPopupSize();

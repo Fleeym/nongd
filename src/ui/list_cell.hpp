@@ -4,7 +4,7 @@
 
 using namespace geode::prelude;
 
-class ListCell : public CCLayer, public FLAlertLayerProtocol {
+class JBListCell : public CCLayer, public FLAlertLayerProtocol {
 protected:
     float m_width;
     float m_height;

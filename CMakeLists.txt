@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5.0)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(nongd VERSION 1.0.0)
+project(jukebox VERSION 2.0.0)
 
 file(GLOB SOURCES
     src/ui/*.cpp

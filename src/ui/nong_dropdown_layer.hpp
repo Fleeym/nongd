@@ -5,21 +5,32 @@
 
 #include "../types/song_info.hpp"
 #include "../types/fetch_status.hpp"
+#include "../types/nong_list_type.hpp"
 #include "../managers/nong_manager.hpp"
-#include "nong_cell.hpp"
 #include "nong_add_popup.hpp"
+#include "nong_cell.hpp"
+#include "song_cell.hpp"
 
 using namespace geode::prelude;
 
-class NongDropdownLayer : public GJDropDownLayer {
+class NongDropdownLayer : public Popup<std::vector<int>, CustomSongWidget*, int> {
 protected:
-    NongData m_songs;
-    int m_songID;
+    std::map<int, NongData> m_data;
+    std::vector<int> m_songIDS;
+    int m_currentSongID = -1;
+    int m_defaultSongID;
     Ref<CustomSongWidget> m_parentWidget;
+    ListView* m_listView = nullptr;
+    NongListType m_currentListType = NongListType::Single;
+
+    CCMenuItemSpriteExtra* m_downloadBtn = nullptr;
+    CCMenuItemSpriteExtra* m_addBtn = nullptr;
+    CCMenuItemSpriteExtra* m_deleteBtn = nullptr;
+    CCMenuItemSpriteExtra* m_backBtn = nullptr;
 
     bool m_fetching = false;
 
-    void setup();
+    bool setup(std::vector<int> ids, CustomSongWidget* parent, int defaultSongID) override;
     void createList();
     SongInfo getActiveSong();
     CCSize getCellSize() const;
@@ -28,26 +39,18 @@ protected:
     void onSFHFetched(nongd::FetchStatus result);
     void onSettings(CCObject*);
     void openAddPopup(CCObject*);
-    void exitLayer(CCObject* target) override;
 public:
+    void onSelectSong(int songID);
+    void onBack(CCObject*);
     int getSongID();
     void setActiveSong(SongInfo const& song);
     void deleteSong(SongInfo const& song);
     void addSong(SongInfo const& song);
     void updateParentWidget(SongInfo const& song);
-    void updateParentSizeAndIDLabel(SongInfo const& song, int songID = 0);
-    void saveSongsToJson();
 
-    static NongDropdownLayer* create(int songID, CustomSongWidget* parent) {
-        log::info("proceeds to call create 51000 times");
+    static NongDropdownLayer* create(std::vector<int> ids, CustomSongWidget* parent, int defaultSongID) {
         auto ret = new NongDropdownLayer;
-        std::stringstream ss;
-        ss << "nongs for ";
-        ss << songID;
-        if (ret && ret->init(ss.str().c_str(), 220.f)) {
-            ret->m_parentWidget = parent;
-            ret->m_songID = songID;
-            ret->setup();
+        if (ret && ret->init(420.f, 280.f, ids, parent, defaultSongID, "GJ_square02.png")) {
             ret->autorelease();
             return ret;
         }
