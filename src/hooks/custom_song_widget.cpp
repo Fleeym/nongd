@@ -47,7 +47,6 @@ class $modify(JBSongWidget, CustomSongWidget) {
 
     void updateSongObject(SongInfoObject* obj) {
         CustomSongWidget::updateSongObject(obj);
-        log::info("{}", m_songs.size());
         if (!m_fields->fetchedAssetInfo && m_songs.size() > 1) {
             m_fields->fetchedAssetInfo = true;
             this->getMultiAssetSongInfo();
@@ -64,7 +63,7 @@ class $modify(JBSongWidget, CustomSongWidget) {
     }
 
     void getMultiAssetSongInfo() {
-        bool notAllDownloaded = false;
+        bool allDownloaded = true;
         for (auto const& kv : m_songs) {
             auto result = NongManager::get()->getNongs(kv.first);
             if (!result.has_value()) {
@@ -72,18 +71,14 @@ class $modify(JBSongWidget, CustomSongWidget) {
                 result = NongManager::get()->getNongs(kv.first);
                 if (!result.has_value()) {
                     // its downloading
-                    notAllDownloaded = true;
+                    allDownloaded = false;
                     continue;
                 }
             }
             m_fields->assetNongData[kv.first] = result.value();
         }
-        if (!notAllDownloaded) {
+        if (allDownloaded) {
             m_fields->fetchedAssetInfo = true;
-        }
-
-        for (auto const& kv : m_fields->assetNongData) {
-            log::info("{}: {}", kv.first, kv.second.active);
         }
     }
 
@@ -120,12 +115,19 @@ class $modify(JBSongWidget, CustomSongWidget) {
         if (m_songs.size() > 1 && !m_fields->fetchedAssetInfo) {
             this->getMultiAssetSongInfo();
             if (!m_fields->fetchedAssetInfo) {
-                FLAlertLayer::create("Error", "Song info isn't fetched yet. Please try again in a few seconds.", "Ok")->show();
                 return;
             }
         }
 		auto scene = CCDirector::sharedDirector()->getRunningScene();
-		auto layer = NongDropdownLayer::create(m_songInfoObject->m_songID, this);
+        std::vector<int> ids;
+        if (m_songs.size() > 1) {
+            for (auto const& kv : m_songs) {
+                ids.push_back(kv.first);
+            }
+        } else {
+            ids.push_back(m_songInfoObject->m_songID);
+        }
+		auto layer = NongDropdownLayer::create(ids, this, m_songInfoObject->m_songID);
         layer->m_noElasticity = true;
 		// based robtroll
 		layer->setZOrder(106);
