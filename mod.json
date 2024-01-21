@@ -4,7 +4,6 @@
 	"id": "fleym.nongd",
 	"name": "Jukebox",
 	"gd": {
-		"android": "2.200",
 		"win": "2.204"
 	},
 	"developer": "Fleym",
