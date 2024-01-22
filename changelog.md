@@ -5,6 +5,7 @@
  * Fix the Robtop Music Library being... a little weird
  * Fix the random Error text that would appear in the song widget sometimes
  * 0.0B fix now accounts for songs that are included with the game (GD/Resources/songs folder)
+ * Fix some editor song select issues
 
 ## v2.1.0
 
