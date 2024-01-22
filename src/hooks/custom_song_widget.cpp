@@ -42,6 +42,9 @@ class $modify(JBSongWidget, CustomSongWidget) {
 
     void updateSongObject(SongInfoObject* obj) {
         CustomSongWidget::updateSongObject(obj);
+        if (m_isRobtopSong) {
+            return;
+        }
         auto result = NongManager::get()->getNongs(obj->m_songID);
         if (!result.has_value()) {
             NongManager::get()->createDefault(obj->m_songID);
@@ -62,6 +65,9 @@ class $modify(JBSongWidget, CustomSongWidget) {
 
     void updateSongInfo() {
         CustomSongWidget::updateSongInfo();
+        if (m_isRobtopSong) {
+            return;
+        }
         if (!m_fields->fetchedAssetInfo && m_songs.size() > 1) {
             m_fields->fetchedAssetInfo = true;
             this->getMultiAssetSongInfo();

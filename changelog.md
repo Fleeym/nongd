@@ -1,8 +1,12 @@
 # Changelog
 
+## v2.0.2
+
+ * Correctly disable nongs for levels that have robtop levels
+
 ## v2.0.1
 
-- Fix a crash that happens when entering a level with song info data not fetched
+ * Fix a crash that happens when entering a level with song info data not fetched
 
 ## v2.0.0
 
