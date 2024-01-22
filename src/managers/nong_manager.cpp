@@ -241,6 +241,13 @@ void NongManager::getMultiAssetSizes(std::string songs, std::string sfx, std::fu
         while (std::getline(stream, s, ',')) {
             int id = std::stoi(s);
             auto path = fs::path(std::string(MusicDownloadManager::sharedState()->pathForSong(id)));
+            if (path.string().starts_with("songs/")) {
+                log::info("{}", path.string());
+                auto gdFolder = fs::path(std::string(CCFileUtils::get()->getWritablePath2())) / "Resources";
+                gdFolder = gdFolder / path.string();
+                log::info("after {}", gdFolder.string());
+                path = gdFolder;
+            }
             if (fs::exists(path)) {
                 sum += fs::file_size(path);
             }
@@ -249,6 +256,11 @@ void NongManager::getMultiAssetSizes(std::string songs, std::string sfx, std::fu
         while (std::getline(stream, s, ',')) {
             int id = std::stoi(s);
             auto path = fs::path(std::string(MusicDownloadManager::sharedState()->pathForSFX(id)));
+            if (path.string().starts_with("sfx/")) {
+                auto gdFolder = fs::path(std::string(CCFileUtils::get()->getWritablePath2())) / "Resources";
+                gdFolder = gdFolder / path.string();
+                path = gdFolder;
+            }
             if (fs::exists(path)) {
                 sum += fs::file_size(path);
             }
