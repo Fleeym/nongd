@@ -15,6 +15,7 @@ class $modify(JBSongWidget, CustomSongWidget) {
     CCMenuItemSpriteExtra* songNameLabel;
     CCLabelBMFont* sizeIdLabel;
     bool fetchedAssetInfo = false;
+    bool firstRun = false;
     std::map<int, NongData> assetNongData;
 
     bool init(
@@ -36,28 +37,27 @@ class $modify(JBSongWidget, CustomSongWidget) {
         }
 
         m_songLabel->setVisible(false);
-        auto result = NongManager::get()->getNongs(songInfo->m_songID);
-        if (!result.has_value()) {
-            NongManager::get()->createDefault(songInfo->m_songID);
-            NongManager::get()->writeJson();
-            result = NongManager::get()->getNongs(songInfo->m_songID);
-        }
-        m_fields->nongs = result.value();
-        this->createSongLabels();
-
         return true;
     }
 
     void updateSongObject(SongInfoObject* obj) {
         CustomSongWidget::updateSongObject(obj);
+        auto result = NongManager::get()->getNongs(obj->m_songID);
+        if (!result.has_value()) {
+            NongManager::get()->createDefault(obj->m_songID);
+            NongManager::get()->writeJson();
+            result = NongManager::get()->getNongs(obj->m_songID);
+            if (!result.has_value()) {
+                return;
+            }
+        }
+        m_fields->nongs = result.value();
         this->createSongLabels();
         auto active = NongManager::get()->getActiveNong(obj->m_songID).value();
         auto data = NongManager::get()->getNongs(obj->m_songID).value();
         if (active.path != data.defaultPath) {
             m_deleteBtn->setVisible(false);
-        } else {
-            m_deleteBtn->setVisible(true);
-        }
+        } 
     }
 
     void updateSongInfo() {
