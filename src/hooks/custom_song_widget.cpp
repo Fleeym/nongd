@@ -42,7 +42,6 @@ class $modify(JBSongWidget, CustomSongWidget) {
         CustomSongWidget::updateWithMultiAssets(p1, p2, p3);
         this->createSongLabels();
         NongManager::get()->getMultiAssetSizes(std::string(p1), std::string(p2), [this](std::string result) {
-            log::info("{}", result);
             std::stringstream ss;
             ss << "Songs: " << m_songs.size() << "  SFX: " << m_sfx.size() << "  Size: " << result;
             m_songIDLabel->setString(ss.str().c_str());
