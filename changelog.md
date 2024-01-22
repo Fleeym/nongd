@@ -6,6 +6,7 @@
  * Fix a crash that happened when entering a level with an invalid song id
  * Store level name separate from song name (and display it in the song list)
  * Store song data as minified json
+ * Fix 0.0B on multi asset levels (experimental)
 
 ## v2.0.1
 

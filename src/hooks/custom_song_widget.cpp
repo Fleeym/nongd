@@ -54,7 +54,8 @@ class $modify(JBSongWidget, CustomSongWidget) {
     }
 
     void fixMultiAssetSize() {
-        if (m_fields->songIds.empty() && m_fields->sfxIds.empty()) {
+        auto flag = Mod::get()->getSettingValue<bool>("fix-empty-size");
+        if ((m_fields->songIds.empty() && m_fields->sfxIds.empty()) || !flag) {
             return;
         }
         NongManager::get()->getMultiAssetSizes(m_fields->songIds, m_fields->sfxIds, [this](std::string result) {

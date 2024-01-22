@@ -21,6 +21,12 @@
 			"type": "bool",
 			"description": "Allows mashups to be downloaded from Song File Hub",
 			"default": true
+		},
+		"fix-empty-size": {
+			"name": "Fix 0.0B",
+			"type": "bool",
+			"description": "Fixes multi asset levels showing 0.0B size (experimental)",
+			"default": false
 		}
 	},
 	"resources": {
