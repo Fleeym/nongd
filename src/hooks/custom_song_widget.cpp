@@ -123,7 +123,6 @@ class $modify(JBSongWidget, CustomSongWidget) {
         auto result = NongManager::get()->getNongs(obj->m_songID);
         if (!result.has_value()) {
             NongManager::get()->createDefault(obj->m_songID);
-            NongManager::get()->writeJson();
             result = NongManager::get()->getNongs(obj->m_songID);
             if (!result.has_value()) {
                 return;
