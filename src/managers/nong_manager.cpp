@@ -175,12 +175,10 @@ void NongManager::createDefault(int songID, bool fromCallback) {
     if (m_state.m_nongs.contains(songID)) {
         return;
     }
-    log::info("creating default for {}", songID);
     SongInfoObject* songInfo = MusicDownloadManager::sharedState()->getSongInfoObject(songID);
     if (songInfo == nullptr && !m_getSongInfoCallbacks.contains(songID) && !fromCallback) {
         MusicDownloadManager::sharedState()->getSongInfo(songID, true);
         m_getSongInfoCallbacks[songID] = [this](int songID) {
-            log::info("download finished", songID);
             this->createDefault(songID, true);
         };
         return;

@@ -15,7 +15,7 @@ class $modify(JBSongWidget, CustomSongWidget) {
     CCMenuItemSpriteExtra* songNameLabel;
     CCLabelBMFont* sizeIdLabel;
     bool fetchedAssetInfo = false;
-    bool firstRun = false;
+    bool firstRun = true;
     std::map<int, NongData> assetNongData;
 
     bool init(
@@ -31,17 +31,20 @@ class $modify(JBSongWidget, CustomSongWidget) {
         if (!CustomSongWidget::init(songInfo, songDelegate, showSongSelect, showPlayMusic, showDownload, isRobtopSong, unk, hasMultipleAssets)) {
             return false;
         }
-
         if (isRobtopSong) {
             return true;
         }
-
+        this->updateSongObject(songInfo);
         m_songLabel->setVisible(false);
         return true;
     }
 
+    void updateWithMultiAssets(gd::string p1, gd::string p2, int p3) {
+        CustomSongWidget::updateWithMultiAssets(p1, p2, p3);
+        this->createSongLabels();
+    }
+
     void updateSongObject(SongInfoObject* obj) {
-        log::info("obj: {}, name: {}, artist: {}, url: {}, unknown: {}", obj->m_songID, obj->m_songName, obj->m_artistName, obj->m_songUrl, obj->m_isUnkownSong);
         if (obj->m_artistName.empty() && obj->m_songUrl.empty() && !m_isRobtopSong) {
             // we have an invalid songID
             auto res = NongManager::get()->getActiveNong(obj->m_songID);
@@ -84,7 +87,6 @@ class $modify(JBSongWidget, CustomSongWidget) {
 
     void updateSongInfo() {
         CustomSongWidget::updateSongInfo();
-        log::info("{}", m_songs.size());
         if (m_isRobtopSong) {
             return;
         }
@@ -189,6 +191,11 @@ class $modify(JBSongWidget, CustomSongWidget) {
             label->setScale(0.4f);
             this->addChild(label);
             m_fields->sizeIdLabel = label;
+        } else {
+            if (m_fields->sizeIdLabel) {
+                m_fields->sizeIdLabel->setVisible(false);
+            }
+            m_songIDLabel->setVisible(true);
         }
     }
 
