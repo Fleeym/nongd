@@ -15,6 +15,7 @@ protected:
     SongInfo m_songInfo;
     CCLabelBMFont* m_songNameLabel;
     CCLabelBMFont* m_authorNameLabel;
+    CCLabelBMFont* m_levelNameLabel = nullptr;
     CCLayer* m_songInfoLayer;
 
     NongDropdownLayer* m_parentPopup;

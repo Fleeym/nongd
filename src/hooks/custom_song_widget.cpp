@@ -84,6 +84,7 @@ class $modify(JBSongWidget, CustomSongWidget) {
 
     void updateSongInfo() {
         CustomSongWidget::updateSongInfo();
+        log::info("{}", m_songs.size());
         if (m_isRobtopSong) {
             return;
         }
@@ -99,7 +100,7 @@ class $modify(JBSongWidget, CustomSongWidget) {
                 m_errorLabel->setVisible(true);
             }
         }
-        if (!m_fields->fetchedAssetInfo && m_songs.size() > 1) {
+        if (!m_fields->fetchedAssetInfo && m_songs.size() != 0) {
             m_fields->fetchedAssetInfo = true;
             this->getMultiAssetSongInfo();
         }
@@ -155,7 +156,7 @@ class $modify(JBSongWidget, CustomSongWidget) {
 		songNameMenuLabel->setContentSize({ 220.f, labelScale * 30 });
         m_fields->menu = menu;
 		this->addChild(menu);
-        if (!m_fields->fetchedAssetInfo && m_sfx.size() == 0) {
+        if (m_songs.size() == 0 && m_sfx.size() == 0) {
             if (m_fields->sizeIdLabel != nullptr) {
                 m_fields->sizeIdLabel->removeFromParent();
             }
@@ -202,6 +203,9 @@ class $modify(JBSongWidget, CustomSongWidget) {
         std::vector<int> ids;
         if (m_songs.size() > 1) {
             for (auto const& kv : m_songs) {
+                if (!NongManager::get()->getNongs(kv.first).has_value()) {
+                    return;
+                }
                 ids.push_back(kv.first);
             }
         } else {

@@ -98,7 +98,7 @@ void NongManager::writeJson() {
     auto json = matjson::Serialize<NongState>::to_json(m_state);
     auto path = this->getJsonPath();
     std::ofstream output(path.string());
-    output << json.dump();
+    output << json.dump(matjson::NO_INDENTATION);
     output.close();
 }
 
@@ -320,18 +320,15 @@ bool NongManager::addNongsFromSFH(std::vector<SFHItem> const& songs, int songID)
     auto nongs = result.value();
     int index = 1;
     for (auto const& sfhSong : songs) {
-        bool shouldSkip = false;
+        bool update = false;
         auto path = nongsPath;
         auto unique = nongd::random_string(16);
         path.append(std::to_string(songID) + "_" + sfhSong.levelName + "_" + unique + ".mp3");
         for (auto& localSong : nongs.songs) {
             if (localSong.songUrl == sfhSong.downloadUrl) {
-                shouldSkip = true;
+                update = true;
                 break;
             }
-        }
-        if (shouldSkip) {
-            continue;
         }
 
         auto sfhSongName = sfhSong.songName;
@@ -373,13 +370,21 @@ bool NongManager::addNongsFromSFH(std::vector<SFHItem> const& songs, int songID)
             .path = path,
             .songName = songName,
             .authorName = artistName,
-            .songUrl = sfhSong.downloadUrl
+            .songUrl = sfhSong.downloadUrl,
+            .levelName = sfhSong.levelName
         };
 
-        if (sfhSong.levelName != "") {
-            song.songName += " (" + sfhSong.levelName + ")";
+        if (update) {
+            for(auto& localSong : nongs.songs) {
+                if (localSong.songUrl == song.songUrl) {
+                    localSong.songName = song.songName;
+                    localSong.authorName = song.authorName;
+                    localSong.levelName = song.levelName;
+                }
+            }
+        } else {
+            nongs.songs.push_back(song);
         }
-        nongs.songs.push_back(song);
     }
 
     this->saveNongs(nongs, songID);

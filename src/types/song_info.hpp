@@ -13,6 +13,7 @@ struct SongInfo {
     std::string songName;
     std::string authorName;
     std::string songUrl;
+    std::string levelName;
 };
 
 struct NongData {
@@ -33,6 +34,10 @@ struct matjson::Serialize<NongData> {
         }
 
         for (auto jsonSong : jsonSongs) {
+            std::string levelName = "";
+            if (jsonSong.contains("levelName")) {
+                levelName = jsonSong["levelName"].as_string();
+            }
             auto path = fs::path(jsonSong["path"].as_string());
 
             SongInfo song = {
@@ -40,6 +45,7 @@ struct matjson::Serialize<NongData> {
                 .songName = jsonSong["songName"].as_string(),
                 .authorName = jsonSong["authorName"].as_string(),
                 .songUrl = jsonSong["songUrl"].as_string(),
+                .levelName = levelName
             };
             songs.push_back(song);
         }
@@ -64,6 +70,7 @@ struct matjson::Serialize<NongData> {
             obj["songName"] = song.songName;
             obj["authorName"] = song.authorName;
             obj["songUrl"] = song.songUrl;
+            obj["levelName"] = song.levelName;
 
             array.push_back(obj);
         }

@@ -52,24 +52,39 @@ bool NongCell::init(SongInfo info, NongDropdownLayer* parentPopup, CCSize const&
 
     m_songInfoLayer = CCLayer::create();
 
+    log::info("{}", m_songInfo.levelName);
+    if (!m_songInfo.levelName.empty()) {
+        m_levelNameLabel = CCLabelBMFont::create(m_songInfo.levelName.c_str(), "bigFont.fnt");
+        m_levelNameLabel->limitLabelWidth(220.f, 0.4f, 0.1f);
+        m_levelNameLabel->setColor(cc3x(0x00c9ff));
+        m_levelNameLabel->setID("level-name");
+    }
+    
     m_songNameLabel = CCLabelBMFont::create(m_songInfo.songName.c_str(), "bigFont.fnt");
-    m_songNameLabel->limitLabelWidth(220.f, 0.8f, 0.1f);
+    m_songNameLabel->limitLabelWidth(220.f, 0.7f, 0.1f);
 
     if (selected) {
         m_songNameLabel->setColor(ccc3(188, 254, 206));
     }
 
     m_authorNameLabel = CCLabelBMFont::create(m_songInfo.authorName.c_str(), "goldFont.fnt");
-    m_authorNameLabel->limitLabelWidth(240.f, 0.7f, 0.1f);
+    m_authorNameLabel->limitLabelWidth(220.f, 0.7f, 0.1f);
     m_authorNameLabel->setID("author-name");
     m_songNameLabel->setID("song-name");
 
+    if (m_levelNameLabel != nullptr) {
+        m_songInfoLayer->addChild(m_levelNameLabel);
+    }
     m_songInfoLayer->addChild(m_authorNameLabel);
     m_songInfoLayer->addChild(m_songNameLabel);
     m_songInfoLayer->setID("song-info");
     auto layout = ColumnLayout::create();
     layout->setAutoScale(false);
-    layout->setAxisAlignment(AxisAlignment::Even);
+    if (m_levelNameLabel != nullptr) {
+        layout->setAxisAlignment(AxisAlignment::Even);
+    } else {
+        layout->setAxisAlignment(AxisAlignment::Center);
+    }
     layout->setCrossAxisLineAlignment(AxisAlignment::Start);
     m_songInfoLayer->setContentSize(ccp(240.f, this->getContentSize().height - 6.f));
     m_songInfoLayer->setAnchorPoint(ccp(0.f, 0.f));

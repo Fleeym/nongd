@@ -19,7 +19,10 @@ class $modify(MusicDownloadManager) {
     void onGetSongInfoCompleted(gd::string p1, gd::string p2) {
         MusicDownloadManager::onGetSongInfoCompleted(p1, p2);
         auto songID = std::stoi(p2);
-        auto songInfo = MusicDownloadManager::sharedState()->getSongInfoObject(songID);
+        auto obj = MusicDownloadManager::sharedState()->getSongInfoObject(songID);
+        if (obj != nullptr) {
+            log::info("FETCHED: obj: {}, name: {}, artist: {}, url: {}, unknown: {}", obj->m_songID, obj->m_songName, obj->m_artistName, obj->m_songUrl, obj->m_isUnkownSong);
+        }
         NongManager::get()->resolveSongInfoCallback(songID);
     }
 
