@@ -230,6 +230,34 @@ std::string NongManager::getFormattedSize(SongInfo const& song) {
     }
 }
 
+void NongManager::getMultiAssetSizes(std::string songs, std::string sfx, std::function<void(std::string)> callback) {
+    std::thread([songs, sfx, callback]() {
+        float sum = 0.f;
+        std::istringstream stream(songs);
+        std::string s;
+        while (std::getline(stream, s, ',')) {
+            int id = std::stoi(s);
+            auto path = fs::path(std::string(MusicDownloadManager::sharedState()->pathForSong(id)));
+            if (fs::exists(path)) {
+                sum += fs::file_size(path);
+            }
+        }
+        stream = std::istringstream(sfx);
+        while (std::getline(stream, s, ',')) {
+            int id = std::stoi(s);
+            auto path = fs::path(std::string(MusicDownloadManager::sharedState()->pathForSFX(id)));
+            if (fs::exists(path)) {
+                sum += fs::file_size(path);
+            }
+        }
+
+        double toMegabytes = sum / 1024.f / 1024.f;
+        std::stringstream ss;
+        ss << std::setprecision(3) << toMegabytes << "MB";
+        callback(ss.str());
+    }).detach();
+}
+
 fs::path NongManager::getJsonPath() {
     auto savedir = fs::path(Mod::get()->getSaveDir().string());
     return savedir / "nong_data.json";

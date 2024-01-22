@@ -34,7 +34,6 @@ class $modify(JBSongWidget, CustomSongWidget) {
         if (isRobtopSong) {
             return true;
         }
-        this->updateSongObject(songInfo);
         m_songLabel->setVisible(false);
         return true;
     }
@@ -42,6 +41,12 @@ class $modify(JBSongWidget, CustomSongWidget) {
     void updateWithMultiAssets(gd::string p1, gd::string p2, int p3) {
         CustomSongWidget::updateWithMultiAssets(p1, p2, p3);
         this->createSongLabels();
+        NongManager::get()->getMultiAssetSizes(std::string(p1), std::string(p2), [this](std::string result) {
+            log::info("{}", result);
+            std::stringstream ss;
+            ss << "Songs: " << m_songs.size() << "  SFX: " << m_sfx.size() << "  Size: " << result;
+            m_songIDLabel->setString(ss.str().c_str());
+        });
     }
 
     void updateSongObject(SongInfoObject* obj) {
