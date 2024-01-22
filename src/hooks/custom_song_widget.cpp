@@ -18,6 +18,7 @@ class $modify(JBSongWidget, CustomSongWidget) {
     std::string sfxIds = "";
     bool fetchedAssetInfo = false;
     bool firstRun = true;
+    bool searching = false;
     std::map<int, NongData> assetNongData;
 
     bool init(
@@ -36,12 +37,16 @@ class $modify(JBSongWidget, CustomSongWidget) {
         if (isRobtopSong) {
             return true;
         }
+        // log::info("songselect {}, playmusic {}, download {}, robtop {}, unk {}, musiclib {}", m_showSelectSongBtn, m_showPlayMusicBtn, m_showDownloadBtn, m_isRobtopSong, m_unkBool1, m_isMusicLibrary);
+
+        
         m_songLabel->setVisible(false);
         return true;
     }
 
     void updateWithMultiAssets(gd::string p1, gd::string p2, int p3) {
         CustomSongWidget::updateWithMultiAssets(p1, p2, p3);
+        // log::info("updatewithmultiassets");
         if (m_isRobtopSong) {
             return;
         }
@@ -71,8 +76,40 @@ class $modify(JBSongWidget, CustomSongWidget) {
         });
     }
 
+    void restoreUI() {
+        m_songLabel->setVisible(true);
+        if (m_fields->menu != nullptr) {
+            m_fields->songNameLabel->removeFromParent();
+            m_fields->songNameLabel = nullptr;
+            m_fields->menu->removeFromParent();
+            m_fields->menu = nullptr;
+        }
+        if (m_fields->sizeIdLabel != nullptr) {
+            m_songIDLabel->setVisible(true);
+            m_fields->sizeIdLabel->removeFromParent();
+            m_fields->sizeIdLabel = nullptr;
+        }
+    }
+
     void updateSongObject(SongInfoObject* obj) {
-        if (obj->m_artistName.empty() && obj->m_songUrl.empty() && !m_isRobtopSong) {
+        // log::info("{}, {}, {}, {}, {}", obj->m_songName, obj->m_artistName, obj->m_songUrl, obj->m_isUnkownSong, obj->m_songID);
+        // log::info("songselect {}, playmusic {}, download {}, robtop {}, unk {}, musiclib {}", m_showSelectSongBtn, m_showPlayMusicBtn, m_showDownloadBtn, m_isRobtopSong, m_unkBool1, m_isMusicLibrary);
+        CustomSongWidget::updateSongObject(obj);
+        if (obj->m_songID == 0) {
+            this->restoreUI();
+            return;
+        }
+        if (m_showSelectSongBtn && obj->m_artistName.empty() && obj->m_songUrl.empty()) {
+            // log::info("returning");
+            this->restoreUI();
+            return;
+        }
+        if (m_isRobtopSong) {
+            return;
+        }
+        // log::info("not returning?");
+        m_songLabel->setVisible(false);
+        if (obj->m_artistName.empty() && obj->m_songUrl.empty()) {
             // we have an invalid songID
             auto res = NongManager::get()->getActiveNong(obj->m_songID);
             if (res.has_value()) {
@@ -82,10 +119,6 @@ class $modify(JBSongWidget, CustomSongWidget) {
                 NongManager::get()->createUnknownDefault(obj->m_songID);
                 obj->m_artistName = "Unknown";
             }
-        }
-        CustomSongWidget::updateSongObject(obj);
-        if (m_isRobtopSong) {
-            return;
         }
         auto result = NongManager::get()->getNongs(obj->m_songID);
         if (!result.has_value()) {
@@ -107,7 +140,7 @@ class $modify(JBSongWidget, CustomSongWidget) {
 
     void updateSongInfo() {
         CustomSongWidget::updateSongInfo();
-        if (m_isRobtopSong) {
+        if (m_isRobtopSong || m_songInfoObject == nullptr || m_songInfoObject->m_songID == 0) {
             return;
         }
         if (!m_fields->fetchedAssetInfo && m_songs.size() != 0) {
