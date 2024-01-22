@@ -26,7 +26,7 @@
 		"fix-empty-size": {
 			"name": "Fix 0.0B",
 			"type": "bool",
-			"description": "Fixes multi asset levels showing 0.0B size (experimental)",
+			"description": "Fixes multi asset levels showing 0.0B size (experimental, does nothing on Android)",
 			"default": false
 		}
 	},

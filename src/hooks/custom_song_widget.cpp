@@ -46,14 +46,15 @@ class $modify(JBSongWidget, CustomSongWidget) {
 
     void updateWithMultiAssets(gd::string p1, gd::string p2, int p3) {
         CustomSongWidget::updateWithMultiAssets(p1, p2, p3);
-        // log::info("updatewithmultiassets");
         if (m_isRobtopSong) {
             return;
         }
         m_fields->songIds = std::string(p1);
         m_fields->sfxIds = std::string(p2);
         this->createSongLabels();
+        #ifndef GEODE_IS_ANDROID
         this->fixMultiAssetSize();
+        #endif
     }
 
     void updateMultiAssetInfo(bool p) {
@@ -61,7 +62,11 @@ class $modify(JBSongWidget, CustomSongWidget) {
         if (m_isRobtopSong) {
             return;
         }
-        this->fixMultiAssetSize();
+        #ifndef GEODE_IS_ANDROID
+        if (m_undownloadedAssets.size() == 0) {
+            this->fixMultiAssetSize();
+        }
+        #endif
     }
 
     void fixMultiAssetSize() {
@@ -161,7 +166,11 @@ class $modify(JBSongWidget, CustomSongWidget) {
                     continue;
                 }
             }
-            m_fields->assetNongData[kv.first] = result.value();
+            if (!m_fields->assetNongData.contains(kv.first)) {
+                m_fields->assetNongData.insert(std::pair(kv.first, result.value()));
+            } else {
+                m_fields->assetNongData[kv.first] = result.value();
+            }
         }
         if (allDownloaded) {
             m_fields->fetchedAssetInfo = true;
@@ -173,7 +182,6 @@ class $modify(JBSongWidget, CustomSongWidget) {
         auto active = NongManager::get()->getActiveNong(songID).value();
         if (m_fields->menu != nullptr) {
             m_fields->menu->removeFromParent();
-            m_fields->songNameLabel->removeFromParent();
         }
 		auto menu = CCMenu::create();
 		menu->setID("song-name-menu");
