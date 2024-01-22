@@ -1,8 +1,11 @@
 # Changelog
 
-## v2.0.2
+## v2.1.0
 
  * Correctly disable nongs for levels that have robtop levels
+ * Fix a crash that happened when entering a level with an invalid song id
+ * Store level name separate from song name (and display it in the song list)
+ * Store song data as minified json
 
 ## v2.0.1
 
