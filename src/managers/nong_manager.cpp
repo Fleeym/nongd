@@ -231,7 +231,10 @@ std::string NongManager::getFormattedSize(SongInfo const& song) {
 }
 
 void NongManager::getMultiAssetSizes(std::string songs, std::string sfx, std::function<void(std::string)> callback) {
-    std::thread([songs, sfx, callback]() {
+    if (!m_fixMultiAssetDone) {
+        m_fixMultiAssetThread.join();
+    }
+    m_fixMultiAssetThread = std::thread([this, songs, sfx, callback]() {
         float sum = 0.f;
         std::istringstream stream(songs);
         std::string s;
@@ -255,7 +258,10 @@ void NongManager::getMultiAssetSizes(std::string songs, std::string sfx, std::fu
         std::stringstream ss;
         ss << std::setprecision(3) << toMegabytes << "MB";
         callback(ss.str());
-    }).detach();
+        m_fixMultiAssetDone = true;
+    });
+    m_fixMultiAssetDone = false;
+    m_fixMultiAssetThread.join();
 }
 
 fs::path NongManager::getJsonPath() {

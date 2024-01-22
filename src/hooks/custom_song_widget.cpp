@@ -14,6 +14,8 @@ class $modify(JBSongWidget, CustomSongWidget) {
     CCMenu* menu;
     CCMenuItemSpriteExtra* songNameLabel;
     CCLabelBMFont* sizeIdLabel;
+    std::string songIds = "";
+    std::string sfxIds = "";
     bool fetchedAssetInfo = false;
     bool firstRun = true;
     std::map<int, NongData> assetNongData;
@@ -40,8 +42,22 @@ class $modify(JBSongWidget, CustomSongWidget) {
 
     void updateWithMultiAssets(gd::string p1, gd::string p2, int p3) {
         CustomSongWidget::updateWithMultiAssets(p1, p2, p3);
+        m_fields->songIds = std::string(p1);
+        m_fields->sfxIds = std::string(p2);
         this->createSongLabels();
-        NongManager::get()->getMultiAssetSizes(std::string(p1), std::string(p2), [this](std::string result) {
+        this->fixMultiAssetSize();
+    }
+
+    void updateMultiAssetInfo(bool p) {
+        CustomSongWidget::updateMultiAssetInfo(p);
+        this->fixMultiAssetSize();
+    }
+
+    void fixMultiAssetSize() {
+        if (m_fields->songIds.empty() && m_fields->sfxIds.empty()) {
+            return;
+        }
+        NongManager::get()->getMultiAssetSizes(m_fields->songIds, m_fields->sfxIds, [this](std::string result) {
             std::stringstream ss;
             ss << "Songs: " << m_songs.size() << "  SFX: " << m_sfx.size() << "  Size: " << result;
             m_songIDLabel->setString(ss.str().c_str());

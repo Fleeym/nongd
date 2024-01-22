@@ -22,6 +22,8 @@ protected:
     inline static NongManager* m_instance = nullptr;
     NongState m_state;
     std::map<int, std::function<void(int)>> m_getSongInfoCallbacks;
+    std::thread m_fixMultiAssetThread;
+    std::atomic<bool> m_fixMultiAssetDone = std::atomic<bool>(true);
 
     bool addNongsFromSFH(std::vector<SFHItem> const& songs, int songID);
 public:
