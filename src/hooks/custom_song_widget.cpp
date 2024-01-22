@@ -42,6 +42,9 @@ class $modify(JBSongWidget, CustomSongWidget) {
 
     void updateWithMultiAssets(gd::string p1, gd::string p2, int p3) {
         CustomSongWidget::updateWithMultiAssets(p1, p2, p3);
+        if (m_isRobtopSong) {
+            return;
+        }
         m_fields->songIds = std::string(p1);
         m_fields->sfxIds = std::string(p2);
         this->createSongLabels();
@@ -50,6 +53,9 @@ class $modify(JBSongWidget, CustomSongWidget) {
 
     void updateMultiAssetInfo(bool p) {
         CustomSongWidget::updateMultiAssetInfo(p);
+        if (m_isRobtopSong) {
+            return;
+        }
         this->fixMultiAssetSize();
     }
 
