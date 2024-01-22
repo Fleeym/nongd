@@ -32,11 +32,26 @@ std::optional<SongInfo> NongManager::getActiveNong(int songID) {
     return std::nullopt;
 }
 
+std::optional<SongInfo> NongManager::getDefaultNong(int songID) {
+    auto nongs_res = this->getNongs(songID);
+    if (!nongs_res.has_value()) {
+        return std::nullopt;
+    }
+    auto nongs = nongs_res.value();
 
-void NongManager::resolveSongInfoCallback(SongInfoObject* obj) {
-    if (m_getSongInfoCallbacks.contains(obj->m_songID)) {
-        m_getSongInfoCallbacks[obj->m_songID](obj->m_songID);
-        m_getSongInfoCallbacks.erase(obj->m_songID);
+    for (auto &song : nongs.songs) {
+        if (song.path == nongs.defaultPath) {
+            return song;
+        }
+    }
+    
+    return std::nullopt;
+}
+
+void NongManager::resolveSongInfoCallback(int id) {
+    if (m_getSongInfoCallbacks.contains(id)) {
+        m_getSongInfoCallbacks[id](id);
+        m_getSongInfoCallbacks.erase(id);
     }
 }
 
@@ -156,17 +171,17 @@ void NongManager::deleteNong(SongInfo const& song, int songID) {
     this->saveNongs(newData, songID);
 }
 
-void NongManager::createDefault(int songID) {
+void NongManager::createDefault(int songID, bool fromCallback) {
     if (m_state.m_nongs.contains(songID)) {
         return;
     }
     log::info("creating default for {}", songID);
     SongInfoObject* songInfo = MusicDownloadManager::sharedState()->getSongInfoObject(songID);
-    if (songInfo == nullptr && !m_getSongInfoCallbacks.contains(songID)) {
+    if (songInfo == nullptr && !m_getSongInfoCallbacks.contains(songID) && !fromCallback) {
         MusicDownloadManager::sharedState()->getSongInfo(songID, true);
         m_getSongInfoCallbacks[songID] = [this](int songID) {
             log::info("download finished", songID);
-            this->createDefault(songID);
+            this->createDefault(songID, true);
         };
         return;
     }
@@ -184,6 +199,25 @@ void NongManager::createDefault(int songID) {
     data.defaultPath = songPath;
     data.songs.push_back(defaultSong);
     m_state.m_nongs[songID] = data;
+}
+
+void NongManager::createUnknownDefault(int songID) {
+    if (this->getNongs(songID).has_value()) {
+        return;
+    }
+    fs::path songPath = fs::path(std::string(MusicDownloadManager::sharedState()->pathForSong(songID)));
+    NongData data;
+    SongInfo defaultSong;
+    defaultSong.authorName = "Unknown";
+    defaultSong.songName = "Unknown";
+    defaultSong.path = songPath;
+    defaultSong.songUrl = "";
+    data.active = songPath;
+    data.defaultPath = songPath;
+    data.songs.push_back(defaultSong);
+    data.defaultValid = false;
+    m_state.m_nongs[songID] = data;
+    this->writeJson();
 }
 
 std::string NongManager::getFormattedSize(SongInfo const& song) {

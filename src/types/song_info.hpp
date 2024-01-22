@@ -19,6 +19,7 @@ struct NongData {
     fs::path active;
     fs::path defaultPath;
     std::vector<SongInfo> songs;
+    bool defaultValid;
 };
 
 template<>
@@ -26,6 +27,10 @@ struct matjson::Serialize<NongData> {
     static NongData from_json(matjson::Value const& value) {
         std::vector<SongInfo> songs;
         auto jsonSongs = value["songs"].as_array();
+        bool valid = true;
+        if (value.contains("defaultValid")) {
+            valid = value["defaultValid"].as_bool();
+        }
 
         for (auto jsonSong : jsonSongs) {
             auto path = fs::path(jsonSong["path"].as_string());
@@ -43,6 +48,7 @@ struct matjson::Serialize<NongData> {
             .active = fs::path(value["active"].as_string()),
             .defaultPath = fs::path(value["defaultPath"].as_string()),
             .songs = songs,
+            .defaultValid = valid
         };
     }
 
@@ -51,6 +57,7 @@ struct matjson::Serialize<NongData> {
         auto array = matjson::Array();
         ret["active"] = value.active.string();
         ret["defaultPath"] = value.defaultPath.string();
+        ret["defaultValid"] = value.defaultValid;
         for (auto song : value.songs) {
             auto obj = matjson::Object();
             obj["path"] = song.path.string();

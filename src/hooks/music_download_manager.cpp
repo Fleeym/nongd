@@ -20,11 +20,14 @@ class $modify(MusicDownloadManager) {
         MusicDownloadManager::onGetSongInfoCompleted(p1, p2);
         auto songID = std::stoi(p2);
         auto songInfo = MusicDownloadManager::sharedState()->getSongInfoObject(songID);
-        NongManager::get()->resolveSongInfoCallback(songInfo);
+        NongManager::get()->resolveSongInfoCallback(songID);
     }
 
     SongInfoObject* getSongInfoObject(int id) {
         auto og = MusicDownloadManager::getSongInfoObject(id);
+        if (og == nullptr) {
+            return og;
+        }
         auto active = NongManager::get()->getActiveNong(id);
         if (active.has_value()) {
             auto value = active.value();

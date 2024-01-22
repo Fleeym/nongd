@@ -41,6 +41,18 @@ class $modify(JBSongWidget, CustomSongWidget) {
     }
 
     void updateSongObject(SongInfoObject* obj) {
+        log::info("obj: {}, name: {}, artist: {}, url: {}, unknown: {}", obj->m_songID, obj->m_songName, obj->m_artistName, obj->m_songUrl, obj->m_isUnkownSong);
+        if (obj->m_artistName.empty() && obj->m_songUrl.empty() && !m_isRobtopSong) {
+            // we have an invalid songID
+            auto res = NongManager::get()->getActiveNong(obj->m_songID);
+            if (res.has_value()) {
+                auto value = res.value();
+                obj->m_artistName = value.authorName;
+            } else {
+                NongManager::get()->createUnknownDefault(obj->m_songID);
+                obj->m_artistName = "Unknown";
+            }
+        }
         CustomSongWidget::updateSongObject(obj);
         if (m_isRobtopSong) {
             return;
@@ -60,13 +72,32 @@ class $modify(JBSongWidget, CustomSongWidget) {
         auto data = NongManager::get()->getNongs(obj->m_songID).value();
         if (active.path != data.defaultPath) {
             m_deleteBtn->setVisible(false);
-        } 
+        }
+        if (!data.defaultValid && active.path != data.defaultPath) {
+            m_getSongInfoBtn->setVisible(false);
+            m_errorLabel->setVisible(false);
+        } else if (!data.defaultValid) {
+            m_getSongInfoBtn->setVisible(true);
+            m_errorLabel->setVisible(true);
+        }
     }
 
     void updateSongInfo() {
         CustomSongWidget::updateSongInfo();
         if (m_isRobtopSong) {
             return;
+        }
+        auto result = NongManager::get()->getNongs(m_songInfoObject->m_songID);
+        if (result.has_value()) {
+            auto data = result.value();
+            auto active = NongManager::get()->getActiveNong(m_songInfoObject->m_songID).value();
+            if (!data.defaultValid && active.path != data.defaultPath) {
+                m_getSongInfoBtn->setVisible(false);
+                m_errorLabel->setVisible(false);
+            } else if (!data.defaultValid) {
+                m_getSongInfoBtn->setVisible(true);
+                m_errorLabel->setVisible(true);
+            }
         }
         if (!m_fields->fetchedAssetInfo && m_songs.size() > 1) {
             m_fields->fetchedAssetInfo = true;
@@ -124,7 +155,6 @@ class $modify(JBSongWidget, CustomSongWidget) {
 		songNameMenuLabel->setContentSize({ 220.f, labelScale * 30 });
         m_fields->menu = menu;
 		this->addChild(menu);
-
         if (!m_fields->fetchedAssetInfo && m_sfx.size() == 0) {
             if (m_fields->sizeIdLabel != nullptr) {
                 m_fields->sizeIdLabel->removeFromParent();

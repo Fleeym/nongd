@@ -29,7 +29,7 @@ public:
      * Only used once, on game launch
     */
     void loadSongs();
-    void resolveSongInfoCallback(SongInfoObject* obj);
+    void resolveSongInfoCallback(int id);
 
     /**
      * Adds a NONG to the JSON of a songID
@@ -64,6 +64,8 @@ public:
      * @throw std::exception if no nong is set as active
     */
     std::optional<SongInfo> getActiveNong(int songID);
+
+    std::optional<SongInfo> getDefaultNong(int songID);
 
     /**
      * Validates any local nongs that have an invalid path
@@ -108,7 +110,9 @@ public:
      * 
      * @param songID the id of the song
     */
-    void createDefault(int songID);
+    void createDefault(int songID, bool fromCallback = false);
+
+    void createUnknownDefault(int songID);
 
     /**
      * Fetches song data from Song File Hub for a songID
