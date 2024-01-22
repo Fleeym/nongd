@@ -28,9 +28,9 @@ class $modify(JBSongWidget, CustomSongWidget) {
         bool showDownload,
         bool isRobtopSong,
         bool unk,
-        bool hasMultipleAssets
+        bool isMusicLibrary
     ) {
-        if (!CustomSongWidget::init(songInfo, songDelegate, showSongSelect, showPlayMusic, showDownload, isRobtopSong, unk, hasMultipleAssets)) {
+        if (!CustomSongWidget::init(songInfo, songDelegate, showSongSelect, showPlayMusic, showDownload, isRobtopSong, unk, isMusicLibrary)) {
             return false;
         }
         if (isRobtopSong) {
@@ -158,9 +158,12 @@ class $modify(JBSongWidget, CustomSongWidget) {
         }
 		auto menu = CCMenu::create();
 		menu->setID("song-name-menu");
-
 		auto label = CCLabelBMFont::create(active.songName.c_str(), "bigFont.fnt");
-		label->limitLabelWidth(220.f, 0.8f, 0.1f);
+        if (!m_isMusicLibrary) {
+		    label->limitLabelWidth(220.f, 0.8f, 0.1f);
+        } else {
+		    label->limitLabelWidth(130.f, 0.4f, 0.1f);
+        }
 		auto songNameMenuLabel = CCMenuItemSpriteExtra::create(
 			label,
 			this,
@@ -174,12 +177,16 @@ class $modify(JBSongWidget, CustomSongWidget) {
 		songNameMenuLabel->setAnchorPoint(ccp(0.f, 0.5f));
         m_fields->songNameLabel = songNameMenuLabel;
 		menu->addChild(songNameMenuLabel);
-		menu->setContentSize(ccp(220.f, 25.f));
-		menu->setPosition(ccp(-140.f, 27.5f));
-		songNameMenuLabel->setContentSize({ 220.f, labelScale * 30 });
+		menu->setContentSize(ccp(label->getContentSize().width * labelScale, 25.f));
+        if (!m_isMusicLibrary) {
+		    menu->setPosition(ccp(-140.f, 27.5f));
+        } else {
+		    menu->setPosition(ccp(-150.f, 9.f));
+        }
+		songNameMenuLabel->setContentSize({ label->getContentSize().width * labelScale, labelScale * 30 });
         m_fields->menu = menu;
 		this->addChild(menu);
-        if (m_songs.size() == 0 && m_sfx.size() == 0) {
+        if (m_songs.size() == 0 && m_sfx.size() == 0 && !m_isMusicLibrary) {
             if (m_fields->sizeIdLabel != nullptr) {
                 m_fields->sizeIdLabel->removeFromParent();
             }
