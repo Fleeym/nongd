@@ -97,31 +97,12 @@ class $modify(JBSongWidget, CustomSongWidget) {
         if (active.path != data.defaultPath) {
             m_deleteBtn->setVisible(false);
         }
-        if (!data.defaultValid && active.path != data.defaultPath) {
-            m_getSongInfoBtn->setVisible(false);
-            m_errorLabel->setVisible(false);
-        } else if (!data.defaultValid) {
-            m_getSongInfoBtn->setVisible(true);
-            m_errorLabel->setVisible(true);
-        }
     }
 
     void updateSongInfo() {
         CustomSongWidget::updateSongInfo();
         if (m_isRobtopSong) {
             return;
-        }
-        auto result = NongManager::get()->getNongs(m_songInfoObject->m_songID);
-        if (result.has_value()) {
-            auto data = result.value();
-            auto active = NongManager::get()->getActiveNong(m_songInfoObject->m_songID).value();
-            if (!data.defaultValid && active.path != data.defaultPath) {
-                m_getSongInfoBtn->setVisible(false);
-                m_errorLabel->setVisible(false);
-            } else if (!data.defaultValid) {
-                m_getSongInfoBtn->setVisible(true);
-                m_errorLabel->setVisible(true);
-            }
         }
         if (!m_fields->fetchedAssetInfo && m_songs.size() != 0) {
             m_fields->fetchedAssetInfo = true;
