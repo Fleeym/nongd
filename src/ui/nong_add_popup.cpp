@@ -59,11 +59,24 @@ void NongAddPopup::openFile(CCObject* target) {
         {}
     };
 
-    if (auto file = file::pickFile(file::PickMode::OpenFile, options)) {
-        m_songPath = file.unwrap();
-    } else if (file.unwrapErr() != "Dialog cancelled") {
-        FLAlertLayer::create("Failed to import mp3!", file.unwrapErr(), "Ok")->show();
-    }
+    file::pickFile(file::PickMode::OpenFile, options, [this](ghc::filesystem::path result) {
+        auto path = fs::path(result.c_str());
+        if (!fs::exists(path)) {
+            FLAlertLayer::create("Error", "The selected file is invalid!", "Ok")->show();
+            return;
+        }
+
+        if (fs::is_directory(path)) {
+            FLAlertLayer::create("Error", "You selected a directory!", "Ok")->show();
+            return;
+        }
+
+        if (path.extension().string() != ".mp3") {
+            FLAlertLayer::create("Error", "The selected file must be an mp3!", "Ok")->show();
+            return;
+        }
+        m_songPath = path;
+    });
 }
 
 void NongAddPopup::createInputs() {
@@ -144,13 +157,12 @@ void NongAddPopup::addSong(CCObject* target) {
     }
 
     auto unique = nongd::random_string(16);
-    auto fileName = m_songPath.stem().string() + "_" + unique + ".mp3";
-    auto savedir = fs::path(Mod::get()->getSaveDir().string());
-    auto destination = savedir / "nongs";
+    auto destination = fs::path(Mod::get()->getSaveDir().string()) / "nongs";
     if (!fs::exists(destination)) {
         fs::create_directory(destination);
     }
-    destination.append(fileName);
+    unique += ".mp3";
+    destination = destination / unique;
     bool result;
     try {
         result = fs::copy_file(m_songPath, destination);
