@@ -3,7 +3,7 @@
 #include <Geode/Geode.hpp>
 #include <filesystem>
 
-#ifdef GEODE_IS_WINDOWS
+#ifndef GEODE_IS_MACOS
 namespace fs = std::filesystem;
 #else
 namespace fs = ghc::filesystem;

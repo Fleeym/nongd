@@ -230,40 +230,48 @@ std::string NongManager::getFormattedSize(SongInfo const& song) {
     }
 }
 
-std::string NongManager::getMultiAssetSizes(std::string songs, std::string sfx) {
-    float sum = 0.f;
-    std::istringstream stream(songs);
-    std::string s;
-    while (std::getline(stream, s, ',')) {
-        int id = std::stoi(s);
-        auto path = fs::path(std::string(MusicDownloadManager::sharedState()->pathForSong(id)));
-        if (path.string().starts_with("songs/")) {
-            auto gdFolder = fs::path(std::string(CCFileUtils::get()->getWritablePath2())) / "Resources";
-            gdFolder = gdFolder / path.string();
-            path = gdFolder;
+void NongManager::getMultiAssetSizes(std::string songs, std::string sfx, std::function<void(std::string)> callback) {
+    fs::path resources = fs::path(CCFileUtils::get()->getWritablePath2().c_str()) / "Resources";
+    fs::path songDir = fs::path(CCFileUtils::get()->getWritablePath().c_str());
+    std::thread([this, songs, sfx, callback, resources, songDir]() {
+        float sum = 0.f;
+        std::istringstream stream(songs);
+        std::string s;
+        while (std::getline(stream, s, ',')) {
+            int id = std::stoi(s);
+            auto result = this->getActiveNong(id);
+            if (!result.has_value()) {
+                continue;
+            }
+            auto path = result.value().path;
+            if (path.string().starts_with("songs/")) {
+                path = resources / path;
+            }
+            if (fs::exists(path)) {
+                sum += fs::file_size(path);
+            }
         }
-        if (fs::exists(path)) {
-            sum += fs::file_size(path);
+        stream = std::istringstream(sfx);
+        while (std::getline(stream, s, ',')) {
+            std::stringstream ss;
+            ss << "s" << s << ".ogg";
+            std::string filename = ss.str();
+            auto localPath = resources / "sfx" / filename;
+            if (fs::exists(localPath)) {
+                sum += fs::file_size(localPath);
+                continue;
+            }
+            auto path = songDir / filename;
+            if (fs::exists(path)) {
+                sum += fs::file_size(path);
+            }
         }
-    }
-    stream = std::istringstream(sfx);
-    while (std::getline(stream, s, ',')) {
-        int id = std::stoi(s);
-        auto path = fs::path(std::string(MusicDownloadManager::sharedState()->pathForSFX(id)));
-        if (path.string().starts_with("sfx/")) {
-            auto gdFolder = fs::path(std::string(CCFileUtils::get()->getWritablePath2())) / "Resources";
-            gdFolder = gdFolder / path.string();
-            path = gdFolder;
-        }
-        if (fs::exists(path)) {
-            sum += fs::file_size(path);
-        }
-    }
 
-    double toMegabytes = sum / 1024.f / 1024.f;
-    std::stringstream ss;
-    ss << std::setprecision(3) << toMegabytes << "MB";
-    return ss.str();
+        double toMegabytes = sum / 1024.f / 1024.f;
+        std::stringstream ss;
+        ss << std::setprecision(3) << toMegabytes << "MB";
+        callback(ss.str());
+    }).detach();
 }
 
 fs::path NongManager::getJsonPath() {

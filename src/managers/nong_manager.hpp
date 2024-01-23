@@ -26,7 +26,7 @@ protected:
     bool addNongsFromSFH(std::vector<SFHItem> const& songs, int songID);
 public:
     /**
-     * Only used once, on game launch
+     * Only used once, on game launch. Reads the json and loads it into memory.
     */
     void loadSongs();
     void resolveSongInfoCallback(int id);
@@ -51,7 +51,7 @@ public:
      * Fetches all NONG data for a certain songID
      * 
      * @param songID the id of the song
-     * @return the data from the JSON
+     * @return the data from the JSON or nullopt if it wasn't created yet
     */
     std::optional<NongData> getNongs(int songID);
 
@@ -59,12 +59,16 @@ public:
      * Fetches the active song from the songID JSON
      * 
      * @param songID the id of the song
-     * @return the song data
-     * 
-     * @throw std::exception if no nong is set as active
+     * @return the song data or nullopt in case of an error
     */
     std::optional<SongInfo> getActiveNong(int songID);
 
+    /**
+     * Fetches the default song from the songID JSON
+     * 
+     * @param songID the id of the song
+     * @return the song data or nullopt in case of an error
+    */
     std::optional<SongInfo> getDefaultNong(int songID);
 
     /**
@@ -105,15 +109,29 @@ public:
     */
     std::string getFormattedSize(SongInfo const& song);
 
-    std::string getMultiAssetSizes(std::string songs, std::string sfx);
+    /**
+     * Calculates the total size of multiple assets, then writes it to a string.
+     * Runs on a separate thread. Returns the result in the provided callback.
+     * 
+     * @param songs string of song ids, separated by commas
+     * @param sfx string of sfx ids, separated by commas
+     * @param callback callback that handles the computed string
+    */
+    void getMultiAssetSizes(std::string songs, std::string sfx, std::function<void(std::string)> callback);
 
     /**
-     * Creates the JSON file for a songID and adds the default song to it
+     * Fetches song info for an id and creates the default entry in the json.
      * 
      * @param songID the id of the song
+     * @param fromCallback used to skip fetching song info from MDM (after it has been done once)
     */
     void createDefault(int songID, bool fromCallback = false);
 
+    /**
+     * Creates a default with name unknown and artist unknown. Used for invalid song ids.
+     * 
+     * @param songID the id of the song
+    */
     void createUnknownDefault(int songID);
 
     /**

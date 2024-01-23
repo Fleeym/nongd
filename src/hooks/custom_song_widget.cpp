@@ -19,7 +19,7 @@ class $modify(JBSongWidget, CustomSongWidget) {
     bool fetchedAssetInfo = false;
     bool firstRun = true;
     bool searching = false;
-    std::map<int, NongData> assetNongData;
+    std::unordered_map<int, NongData> assetNongData;
 
     bool init(
         SongInfoObject* songInfo,
@@ -48,7 +48,9 @@ class $modify(JBSongWidget, CustomSongWidget) {
         CustomSongWidget::updateWithMultiAssets(p1, p2, p3);
         m_fields->songIds = std::string(p1);
         m_fields->sfxIds = std::string(p2);
-        this->fixMultiAssetSize();
+        if (m_fields->fetchedAssetInfo) {
+            this->fixMultiAssetSize();
+        }
         if (m_isRobtopSong) {
             return;
         }
@@ -57,7 +59,9 @@ class $modify(JBSongWidget, CustomSongWidget) {
 
     void updateMultiAssetInfo(bool p) {
         CustomSongWidget::updateMultiAssetInfo(p);
-        this->fixMultiAssetSize();
+        if (m_fields->fetchedAssetInfo) {
+            this->fixMultiAssetSize();
+        }
     }
 
     void fixMultiAssetSize() {
@@ -65,10 +69,11 @@ class $modify(JBSongWidget, CustomSongWidget) {
         if ((m_fields->songIds.empty() && m_fields->sfxIds.empty()) || !flag) {
             return;
         }
-        auto result = NongManager::get()->getMultiAssetSizes(m_fields->songIds, m_fields->sfxIds);
-        std::stringstream ss;
-        ss << "Songs: " << m_songs.size() << "  SFX: " << m_sfx.size() << "  Size: " << result;
-        m_songIDLabel->setString(ss.str().c_str());
+        NongManager::get()->getMultiAssetSizes(m_fields->songIds, m_fields->sfxIds, [this](std::string result) {
+            std::stringstream ss;
+            ss << "Songs: " << m_songs.size() << "  SFX: " << m_sfx.size() << "  Size: " << result;
+            m_songIDLabel->setString(ss.str().c_str());
+        });
     }
 
     void restoreUI() {
@@ -138,7 +143,6 @@ class $modify(JBSongWidget, CustomSongWidget) {
             return;
         }
         if (!m_fields->fetchedAssetInfo && m_songs.size() != 0) {
-            m_fields->fetchedAssetInfo = true;
             this->getMultiAssetSongInfo();
         }
     }
@@ -156,11 +160,8 @@ class $modify(JBSongWidget, CustomSongWidget) {
                     continue;
                 }
             }
-            if (!m_fields->assetNongData.contains(kv.first)) {
-                m_fields->assetNongData.insert(std::pair(kv.first, result.value()));
-            } else {
-                m_fields->assetNongData[kv.first] = result.value();
-            }
+            auto value = result.value();
+            m_fields->assetNongData[kv.first] = value;
         }
         if (allDownloaded) {
             m_fields->fetchedAssetInfo = true;
