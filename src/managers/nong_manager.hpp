@@ -105,7 +105,7 @@ public:
     */
     std::string getFormattedSize(SongInfo const& song);
 
-    void getMultiAssetSizes(std::string songs, std::string sfx, std::function<void(std::string)> callback);
+    std::string getMultiAssetSizes(std::string songs, std::string sfx);
 
     /**
      * Creates the JSON file for a songID and adds the default song to it

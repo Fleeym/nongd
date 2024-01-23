@@ -29,7 +29,7 @@ struct matjson::Serialize<NongState> {
     static matjson::Value to_json(NongState const& value) {
         auto ret = matjson::Object();
         auto nongs = matjson::Object();
-        ret["version"] = value.m_manifestVersion;
+        ret["version"] = nongd::getManifestVersion();
         for (auto const& kv : value.m_nongs) {
             nongs[std::to_string(kv.first)] = matjson::Serialize<NongData>::to_json(kv.second);
         }

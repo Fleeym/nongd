@@ -46,27 +46,18 @@ class $modify(JBSongWidget, CustomSongWidget) {
 
     void updateWithMultiAssets(gd::string p1, gd::string p2, int p3) {
         CustomSongWidget::updateWithMultiAssets(p1, p2, p3);
+        m_fields->songIds = std::string(p1);
+        m_fields->sfxIds = std::string(p2);
+        this->fixMultiAssetSize();
         if (m_isRobtopSong) {
             return;
         }
-        m_fields->songIds = std::string(p1);
-        m_fields->sfxIds = std::string(p2);
         this->createSongLabels();
-        #ifndef GEODE_IS_ANDROID
-        this->fixMultiAssetSize();
-        #endif
     }
 
     void updateMultiAssetInfo(bool p) {
         CustomSongWidget::updateMultiAssetInfo(p);
-        if (m_isRobtopSong) {
-            return;
-        }
-        #ifndef GEODE_IS_ANDROID
-        if (m_undownloadedAssets.size() == 0) {
-            this->fixMultiAssetSize();
-        }
-        #endif
+        this->fixMultiAssetSize();
     }
 
     void fixMultiAssetSize() {
@@ -74,11 +65,10 @@ class $modify(JBSongWidget, CustomSongWidget) {
         if ((m_fields->songIds.empty() && m_fields->sfxIds.empty()) || !flag) {
             return;
         }
-        NongManager::get()->getMultiAssetSizes(m_fields->songIds, m_fields->sfxIds, [this](std::string result) {
-            std::stringstream ss;
-            ss << "Songs: " << m_songs.size() << "  SFX: " << m_sfx.size() << "  Size: " << result;
-            m_songIDLabel->setString(ss.str().c_str());
-        });
+        auto result = NongManager::get()->getMultiAssetSizes(m_fields->songIds, m_fields->sfxIds);
+        std::stringstream ss;
+        ss << "Songs: " << m_songs.size() << "  SFX: " << m_sfx.size() << "  Size: " << result;
+        m_songIDLabel->setString(ss.str().c_str());
     }
 
     void restoreUI() {
