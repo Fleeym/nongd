@@ -166,8 +166,10 @@ void NongAddPopup::addSong(CCObject* target) {
     bool result;
     try {
         result = fs::copy_file(m_songPath, destination);
-    } catch (...) {
-        FLAlertLayer::create("Error", "Failed to save song. Please try again!", "Ok")->show();
+    } catch (fs::filesystem_error e) {
+        std::stringstream ss;
+        ss << "Failed to save song. Please try again! Error: " << e.what();
+        FLAlertLayer::create("Error", ss.str().c_str(), "Ok")->show();
         return;
     }
     if (!result) {
