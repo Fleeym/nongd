@@ -59,23 +59,11 @@ void NongAddPopup::openFile(CCObject* target) {
         {}
     };
 
-    file::pickFile(file::PickMode::OpenFile, options, [this](ghc::filesystem::path result) {
+    file::pickFile(file::PickMode::OpenFile , options, [this](ghc::filesystem::path result) {
         auto path = fs::path(result.c_str());
-        if (!fs::exists(path)) {
-            FLAlertLayer::create("Error", "The selected file is invalid!", "Ok")->show();
-            return;
-        }
-
-        if (fs::is_directory(path)) {
-            FLAlertLayer::create("Error", "You selected a directory!", "Ok")->show();
-            return;
-        }
-
-        if (path.extension().string() != ".mp3") {
-            FLAlertLayer::create("Error", "The selected file must be an mp3!", "Ok")->show();
-            return;
-        }
         m_songPath = path;
+    }, []() {
+        FLAlertLayer::create("Error", "Failed to open file", "Ok")->show();
     });
 }
 
@@ -131,28 +119,34 @@ void NongAddPopup::createInputs() {
 void NongAddPopup::addSong(CCObject* target) {
     auto artistName = std::string(m_artistNameInput->getString());
     auto songName = std::string(m_songNameInput->getString());
+    if (m_songPath.empty()) {
+        FLAlertLayer::create("Error", "No file selected.", "Ok")->show();
+        return;
+    }
     if (!fs::exists(m_songPath)) {
-        FLAlertLayer::create("Error", "The selected file is invalid!", "Ok")->show();
+        std::stringstream ss;
+        ss << "The selected file (" << m_songPath.string() << ") does not exist.";
+        FLAlertLayer::create("Error", ss.str().c_str(), "Ok")->show();
         return;
     }
 
     if (fs::is_directory(m_songPath)) {
-        FLAlertLayer::create("Error", "You selected a directory!", "Ok")->show();
+        FLAlertLayer::create("Error", "You selected a directory.", "Ok")->show();
         return;
     }
 
     if (m_songPath.extension().string() != ".mp3") {
-        FLAlertLayer::create("Error", "The selected file must be an mp3!", "Ok")->show();
+        FLAlertLayer::create("Error", "The selected file must be an MP3.", "Ok")->show();
         return;
     }
 
     if (songName == "") {
-        FLAlertLayer::create("Error", "Song name is empty", "Ok")->show();
+        FLAlertLayer::create("Error", "Song name is empty.", "Ok")->show();
         return;
     }
 
     if (artistName == "") {
-        FLAlertLayer::create("Error", "Artist name is empty", "Ok")->show();
+        FLAlertLayer::create("Error", "Artist name is empty.", "Ok")->show();
         return;
     }
 
