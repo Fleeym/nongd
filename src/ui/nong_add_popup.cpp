@@ -151,7 +151,7 @@ void NongAddPopup::addSong(CCObject* target) {
     }
 
     auto unique = nongd::random_string(16);
-    auto destination = fs::path(Mod::get()->getSaveDir().string()) / "nongs";
+    auto destination = fs::path(Mod::get()->getSaveDir().c_str()) / "nongs";
     if (!fs::exists(destination)) {
         fs::create_directory(destination);
     }

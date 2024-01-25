@@ -203,7 +203,7 @@ void NongDropdownLayer::createList() {
             break;
         }
     }
-    handleTouchPriority(this);
+    handleTouchPriorityWith(this, 0);
 }
 
 SongInfo NongDropdownLayer::getActiveSong() {

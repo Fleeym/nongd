@@ -11,25 +11,6 @@ file(GLOB SOURCES
 	src/*.cpp
 )
 
-if (${NONGD_BUILD_ANDROID})
-    if (NOT DEFINED ENV{NDK})
-        message(FATAL_ERROR "Unable to find NDK. Make sure it is defined in your path")
-    else()
-        message(STATUS "Found Android NDK: $ENV{NDK}")
-    endif()
-    set(CMAKE_TOOLCHAIN_FILE $ENV{NDK}/build/cmake/android.toolchain.cmake)
-    set(ANDROID_ABI "arm64-v8a")
-    set(ANDROID_PLATFORM "android-24")
-    set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")
-    set(GEODE_DONT_INSTALL_MODS 1)
-endif()
-
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND WIN32 AND NOT DEFINED ${NONGD_BUILD_ANDROID})
-    message(STATUS "Setting Clang to 32-bit")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
-endif()
-
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
 if (NOT DEFINED ENV{GEODE_SDK})
