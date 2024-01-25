@@ -4,7 +4,6 @@
 #include <string>
 
 #include "../filesystem.hpp"
-#include "../manifest.hpp"
 
 using namespace geode::prelude;
 

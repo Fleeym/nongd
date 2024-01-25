@@ -52,3 +52,6 @@ Source/Geode/pkg/uber-apk-signer.jar
 **/.vscode
 
 build-android.bat
+
+# clangd cache
+.cache/clangd

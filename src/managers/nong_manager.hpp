@@ -3,17 +3,14 @@
 #include <Geode/Geode.hpp>
 #include <Geode/utils/web.hpp>
 #include <optional>
-#include <fstream>
 #include <map>
 
 #include "../types/song_info.hpp"
-#include "../random_string.hpp"
-#include "../trim.hpp"
 #include "../types/fetch_status.hpp"
 #include "../types/sfh_item.hpp"
-#include "../manifest.hpp"
 #include "../types/nong_state.hpp"
-#include "../filesystem.hpp"
+#include "../random_string.hpp"
+#include "../trim.hpp"
 
 using namespace geode::prelude;
 

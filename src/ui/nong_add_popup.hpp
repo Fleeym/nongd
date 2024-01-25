@@ -2,7 +2,6 @@
 
 #include <Geode/Geode.hpp>
 
-#include "../types/song_info.hpp"
 #include "../random_string.hpp"
 #include "nong_dropdown_layer.hpp"
 
