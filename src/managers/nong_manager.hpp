@@ -26,7 +26,21 @@ public:
      * Only used once, on game launch. Reads the json and loads it into memory.
     */
     void loadSongs();
+
+    /**
+     * Execute callbacks stored for getSongInfo for a songID, if they exist
+    */
     void resolveSongInfoCallback(int id);
+
+    /**
+     * Gets the current manifest version stored in state 
+    */
+    int getCurrentManifestVersion();
+
+    /**
+     * Gets the current number of song IDs that have been added to the manifest
+    */
+    int getStoredIDCount();
 
     /**
      * Adds a NONG to the JSON of a songID

@@ -89,6 +89,14 @@ std::vector<SongInfo> NongManager::validateNongs(int songID) {
     return invalidSongs;
 }
 
+int NongManager::getCurrentManifestVersion() {
+    return m_state.m_manifestVersion;
+}
+
+int NongManager::getStoredIDCount() {
+    return m_state.m_nongs.size();
+}
+
 void NongManager::saveNongs(NongData const& data, int songID) {
     m_state.m_nongs[songID] = data;
     this->writeJson();
