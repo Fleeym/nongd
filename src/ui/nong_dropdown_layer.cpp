@@ -22,6 +22,18 @@ bool NongDropdownLayer::setup(std::vector<int> ids, CustomSongWidget* parent, in
     }
     auto winsize = CCDirector::sharedDirector()->getWinSize();
 
+    int manifest = NongManager::get()->getCurrentManifestVersion();
+    int count = NongManager::get()->getStoredIDCount();
+    std::stringstream ss;
+    ss << "Manifest v" << manifest << ", storing " << count << " unique song IDs.";
+
+    auto manifestLabel = CCLabelBMFont::create(ss.str().c_str(), "chatFont.fnt");
+    manifestLabel->setPosition(winsize.width / 2, winsize.height / 2 - 125.f);
+    manifestLabel->limitLabelWidth(140.f, 0.9f, 0.1f);
+    manifestLabel->setColor(cc3x(0xc2c2c2));
+    manifestLabel->setID("manifest-label");
+    m_mainLayer->addChild(manifestLabel);
+
     auto spr = CCSprite::createWithSpriteFrameName("GJ_downloadBtn_001.png");
     spr->setScale(0.7f);
     auto menu = CCMenu::create();
@@ -117,6 +129,7 @@ bool NongDropdownLayer::setup(std::vector<int> ids, CustomSongWidget* parent, in
     title->setPosition(ccp(winsize.width / 2, winsize.height / 2 + 125.f));
     title->setScale(0.75f);
     m_mainLayer->addChild(title);
+    handleTouchPriority(this);
     return true;
 }
 
@@ -155,7 +168,11 @@ void NongDropdownLayer::onBack(CCObject*) {
 }
 
 void NongDropdownLayer::openAddPopup(CCObject* target) {
+    #ifdef GEODE_IS_ANDROID
+    FLAlertLayer::create("Unavailable", "Adding songs manually is <cr>temporarily unavailable</c> on Android.", "Ok")->show();
+    #else
     NongAddPopup::create(this)->show();
+    #endif
 }
 
 void NongDropdownLayer::createList() {
@@ -203,7 +220,7 @@ void NongDropdownLayer::createList() {
             break;
         }
     }
-    handleTouchPriorityWith(this, 0);
+    handleTouchPriority(this);
 }
 
 SongInfo NongDropdownLayer::getActiveSong() {
