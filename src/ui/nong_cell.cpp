@@ -52,7 +52,6 @@ bool NongCell::init(SongInfo info, NongDropdownLayer* parentPopup, CCSize const&
 
     m_songInfoLayer = CCLayer::create();
 
-    log::info("{}", m_songInfo.levelName);
     if (!m_songInfo.levelName.empty()) {
         m_levelNameLabel = CCLabelBMFont::create(m_songInfo.levelName.c_str(), "bigFont.fnt");
         m_levelNameLabel->limitLabelWidth(220.f, 0.4f, 0.1f);
