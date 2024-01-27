@@ -168,11 +168,11 @@ void NongDropdownLayer::onBack(CCObject*) {
 }
 
 void NongDropdownLayer::openAddPopup(CCObject* target) {
-    #ifdef GEODE_IS_ANDROID
-    FLAlertLayer::create("Unavailable", "Adding songs manually is <cr>temporarily unavailable</c> on Android.", "Ok")->show();
-    #else
+    // #ifdef GEODE_IS_ANDROID
+    // FLAlertLayer::create("Unavailable", "Adding songs manually is <cr>temporarily unavailable</c> on Android.", "Ok")->show();
+    // #else
     NongAddPopup::create(this)->show();
-    #endif
+    // #endif
 }
 
 void NongDropdownLayer::createList() {
